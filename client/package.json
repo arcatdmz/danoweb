@@ -1,0 +1,25 @@
+{
+  "name": "denolop-client",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "parcel serve index.html --out-dir=../server/lib/",
+    "build": "yarn build-index && yarn build-json && yarn build-css && yarn build-html && yarn build-ts && yarn build-worker",
+    "build-index": "parcel build index.html --out-dir=../server/lib/ --public-url /lib/",
+    "build-json": "parcel build node_modules/monaco-editor/esm/vs/language/json/json.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
+    "build-css": "parcel build node_modules/monaco-editor/esm/vs/language/css/css.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
+    "build-html": "parcel build node_modules/monaco-editor/esm/vs/language/html/html.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
+    "build-ts": "parcel build node_modules/monaco-editor/esm/vs/language/typescript/ts.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
+    "build-worker": "parcel build node_modules/monaco-editor/esm/vs/editor/editor.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/"
+  },
+  "dependencies": {
+    "@types/dotenv": "^6.1.1",
+    "firebase": "^5.11.0",
+    "firepad": "^1.5.3",
+    "monaco-editor": "^0.16.2"
+  },
+  "devDependencies": {
+    "parcel-bundler": "^1.12.3",
+    "typescript": "^3.4.5"
+  }
+}

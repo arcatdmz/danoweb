@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "start": "deno --allow-net --allow-read mod.ts",
-    "build": "cd ../client && yarn build"
+    "build": "cd ../client && yarn build",
+    "build-index": "cd ../client && yarn build-index"
   },
   "devDependencies": {
     "typescript": "^3.4.5",
