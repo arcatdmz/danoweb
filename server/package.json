@@ -6,7 +6,8 @@
   "author": "Jun Kato <i@junkato.jp>",
   "license": "MIT",
   "scripts": {
-    "start": "deno --allow-net mod.ts"
+    "start": "deno --allow-net --allow-read mod.ts",
+    "build": "cd ../client && yarn build"
   },
   "devDependencies": {
     "typescript": "^3.4.5",

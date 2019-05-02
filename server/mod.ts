@@ -52,7 +52,8 @@ async function handleGet(req: ServerRequest) {
 }
 
 async function serveSystemFile(req: ServerRequest, fileName: string) {
-  const filePath = `${systemDir}/${fileName}`;
+  if (fileName.indexOf("/lib/") !== 0) return false;
+  const filePath = systemDir + fileName.substr("/lib".length);
   try {
     const fileInfo = await stat(filePath);
     if (fileInfo.isDirectory()) {
@@ -69,7 +70,7 @@ async function serveSystemFile(req: ServerRequest, fileName: string) {
 }
 
 async function serveUserFile(req: ServerRequest, fileName: string) {
-  const filePath = `${userDir}/${fileName}`;
+  const filePath = userDir + fileName;
   let response: Response;
   try {
     const fileInfo = await stat(filePath);
