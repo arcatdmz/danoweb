@@ -1,7 +1,6 @@
 {
   "editor.formatOnSave": true,
   "files.exclude": {
-    "server": true,
-    "client": true
+    "lib": true
   }
 }
