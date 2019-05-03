@@ -1,6 +1,3 @@
 {
-  "editor.formatOnSave": true,
-  "files.exclude": {
-    "lib": true
-  }
+  "editor.formatOnSave": true
 }
