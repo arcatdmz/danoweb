@@ -11,6 +11,7 @@ const { cwd, stat, open } = Deno;
 
 const userDir = `${cwd()}/src`;
 const systemDir = `${cwd()}/lib`;
+const systemIndexFile = `${systemDir}/index.html`;
 const s = serve("127.0.0.1:8000");
 const te = new TextEncoder();
 
@@ -48,6 +49,9 @@ async function handleGet(req: ServerRequest) {
 
   // parse file name
   const fileName = paths[0].replace(/\/$/, "");
+  if (query.mode === "edit") {
+    return serveEditor(req, fileName);
+  }
   return (await serveSystemFile(req, fileName)) || serveUserFile(req, fileName);
 }
 
@@ -81,6 +85,29 @@ async function serveUserFile(req: ServerRequest, fileName: string) {
       };
     } else {
       response = await serveFile(filePath);
+    }
+  } catch (e) {
+    response = {
+      body: te.encode("File not found\n"),
+      status: Status.NotFound
+    };
+  } finally {
+    req.respond(response);
+  }
+}
+
+async function serveEditor(req: ServerRequest, fileName: string) {
+  const filePath = userDir + fileName;
+  let response: Response;
+  try {
+    const fileInfo = await stat(filePath);
+    if (fileInfo.isDirectory()) {
+      response = {
+        body: te.encode("Directory listing prohibited\n"),
+        status: Status.Unauthorized
+      };
+    } else {
+      response = await serveFile(systemIndexFile);
     }
   } catch (e) {
     response = {
