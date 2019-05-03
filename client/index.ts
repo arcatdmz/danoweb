@@ -22,6 +22,8 @@ import "firebase/database";
 
 import Firepad from "firepad";
 
+import axios from "axios";
+
 firebase.initializeApp({
   apiKey: process.env.API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
@@ -52,7 +54,8 @@ window.onload = function() {
   };
 
   const editor = monaco.editor.create(document.getElementById("firepad"), {
-    language: "javascript"
+    language: "javascript",
+    defaultText: (await axios.get(location.pathname)).data
   });
 
   const firepadRef = getExampleRef();
