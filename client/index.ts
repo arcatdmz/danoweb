@@ -34,7 +34,9 @@ firebase.initializeApp({
   appId: process.env.APP_ID
 });
 
-window.onload = function() {
+window.onload = async function() {
+  const filePath = location.pathname;
+
   window["MonacoEnvironment"] = {
     getWorkerUrl: function(moduleId, label) {
       if (label === "json") {
@@ -54,33 +56,43 @@ window.onload = function() {
   };
 
   const editor = monaco.editor.create(document.getElementById("firepad"), {
-    language: "javascript",
-    defaultText: (await axios.get(location.pathname)).data
+    language: getLanguage(filePath)
   });
 
-  const firepadRef = getExampleRef();
-  Firepad.fromMonaco(firepadRef, editor);
+  axios
+    .get(filePath)
+    .then(res => {
+      const firepadRef = firebase
+        .database()
+        .ref(`files/${getFirebasePath(filePath)}`);
+      const firepad = Firepad.fromMonaco(firepadRef, editor, {
+        defaultText: res.data as string
+      });
+      console.log("firepad", firepad);
+    })
+    .catch(err => {
+      console.error(err);
+    });
 };
 
-// Helper to get hash from end of URL or generate a random one.
-function getExampleRef() {
-  var ref = firebase.database().ref();
-  var hash = window.location.hash.replace(/#/g, "");
-  if (hash) {
-    ref = ref.child(hash);
-  } else {
-    // generate unique location.
-    ref = ref.push();
+function getLanguage(filePath: string) {
+  if (!filePath || filePath.length <= 0) return null;
+  switch (filePath.substr(filePath.lastIndexOf(".") + 1).toLowerCase()) {
+    case "json":
+      return "json";
+    case "css":
+      return "css";
+    case "html":
+      return "html";
+    case "ts":
+    case "tsx":
+    case "js":
+    case "jsx":
+      return "typescript";
+  }
+  return null;
+}
 
-    // add it as a hash to the URL.
-    window.history.pushState(
-      null,
-      window.document.title,
-      window.location + "#" + ref.key
-    );
-  }
-  if (typeof console !== "undefined") {
-    console.log("Firebase data: ", ref.toString());
-  }
-  return ref;
+function getFirebasePath(filePath: string) {
+  return encodeURIComponent(filePath).replace(/\./g, "%2E");
 }
