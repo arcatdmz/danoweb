@@ -7,12 +7,18 @@ import { Status } from "https://deno.land/std/http/http_status.ts";
 import { extname } from "https://deno.land/std/fs/path.ts";
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
 
-const { cwd, stat, open } = Deno;
+interface QueryParameters {
+  [key: string]: string;
+}
 
+const { cwd, env, open, stat } = Deno;
+
+const debug = env()["DENO_ENV"] === "development";
 const userDir = `${cwd()}/src`;
 const systemDir = `${cwd()}/lib`;
 const systemIndexFile = `${systemDir}/index.html`;
-const s = serve("127.0.0.1:8000");
+const address = "127.0.0.1:8000";
+const s = serve(address);
 const te = new TextEncoder();
 
 async function main() {
@@ -34,7 +40,7 @@ async function main() {
 async function handleGet(req: ServerRequest) {
   // parse query string
   const paths = req.url.split("?");
-  let query: { [key: string]: string } = {};
+  let query: QueryParameters = {};
   if (paths.length > 1) {
     paths[1].split("&").forEach(q_ => {
       const q = q_.split("=");
@@ -47,23 +53,53 @@ async function handleGet(req: ServerRequest) {
     });
   }
 
-  // parse file name
-  const fileName = paths[0].replace(/\/$/, "");
-  if (query.mode === "edit") {
-    return serveEditor(req, fileName);
+  // parse request path
+  const reqPath = paths[0].replace(/\/$/, "");
+
+  // handle API request
+  if (reqPath.indexOf("/api/") === 0) {
+    const api = handleAPIRequest(req, reqPath.substr("/api".length), query);
+    if (api) return api;
   }
-  return (await serveSystemFile(req, fileName)) || serveUserFile(req, fileName);
+
+  // handle edit request
+  if (query.mode === "edit") {
+    return serveEditor(req, reqPath);
+  }
+
+  // serve a file
+  return (await serveSystemFile(req, reqPath)) || serveUserFile(req, reqPath);
 }
 
-async function serveSystemFile(req: ServerRequest, fileName: string) {
-  if (fileName.indexOf("/lib/") !== 0) return false;
-  const filePath = systemDir + fileName.substr("/lib".length);
+function handleAPIRequest(
+  req: ServerRequest,
+  reqPath: string,
+  query: QueryParameters
+) {
+  let response: Response;
+  if (reqPath === "/server") {
+    response = {
+      body: te.encode(JSON.stringify({ address, debug }))
+    };
+  }
+  if (response) {
+    const headers = new Headers();
+    headers.set("content-type", contentType(extname(reqPath)));
+    response.headers = headers;
+    return req.respond(response);
+  }
+  return null;
+}
+
+async function serveSystemFile(req: ServerRequest, reqPath: string) {
+  if (reqPath.indexOf("/lib/") !== 0) return false;
+  const filePath = systemDir + reqPath.substr("/lib".length);
   try {
     const fileInfo = await stat(filePath);
     if (fileInfo.isDirectory()) {
       return serveSystemFile(
         req,
-        (fileName.substr(-1) === "/" ? "" : "/") + "index.html"
+        (reqPath.substr(-1) === "/" ? "" : "/") + "index.html"
       );
     }
     await req.respond(await serveFile(filePath));
@@ -73,8 +109,8 @@ async function serveSystemFile(req: ServerRequest, fileName: string) {
   }
 }
 
-async function serveUserFile(req: ServerRequest, fileName: string) {
-  const filePath = userDir + fileName;
+async function serveUserFile(req: ServerRequest, reqPath: string) {
+  const filePath = userDir + reqPath;
   let response: Response;
   try {
     const fileInfo = await stat(filePath);
@@ -96,8 +132,8 @@ async function serveUserFile(req: ServerRequest, fileName: string) {
   }
 }
 
-async function serveEditor(req: ServerRequest, fileName: string) {
-  const filePath = userDir + fileName;
+async function serveEditor(req: ServerRequest, reqPath: string) {
+  const filePath = userDir + reqPath;
   let response: Response;
   try {
     const fileInfo = await stat(filePath);
