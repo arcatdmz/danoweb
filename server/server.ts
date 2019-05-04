@@ -50,14 +50,14 @@ const userFileHandler = new UserFileRequestHandler({
 async function main() {
   for await (const req of s) {
     switch (req.method.toLowerCase()) {
-      case "post":
+      case "get":
+        handleGet(req);
+        break;
+      default:
         req.respond({
           body: encoder.encode("Not implemented\n"),
           status: Status.NotImplemented
         });
-        break;
-      case "get":
-        handleGet(req);
         break;
     }
   }
