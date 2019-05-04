@@ -34,7 +34,7 @@ export class Editor {
   }
   async initialize() {
     window["MonacoEnvironment"] = {
-      getWorkerUrl: function(moduleId, label) {
+      getWorkerUrl: function(_moduleId, label) {
         if (label === "json") {
           return "/lib/json.worker.js";
         }
