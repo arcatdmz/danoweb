@@ -8,7 +8,10 @@ import {
   FormFile,
   isFormFile
 } from "https://deno.land/std/multipart/formfile.ts";
-import { MultipartReader } from "https://deno.land/std/multipart/multipart.ts";
+import {
+  MultipartWriter,
+  MultipartReader
+} from "https://deno.land/std/multipart/multipart.ts";
 
 import { extname, sep } from "https://deno.land/std/fs/path.ts";
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
@@ -20,6 +23,7 @@ export {
   Status,
   FormFile,
   isFormFile,
+  MultipartWriter,
   MultipartReader,
   extname,
   sep,

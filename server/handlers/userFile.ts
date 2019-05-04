@@ -71,16 +71,21 @@ export class UserFileRequestHandler implements RequestHandler {
     // );
 
     // this one also fails:
+    // const arr = await req.body();
+    // const reader = new MultipartReader(
+    //   new Uint8ArrayReader(arr),
+    //   boundaryString
+    // );
+
     const arr = await req.body();
-    const reader = new MultipartReader(
-      new Uint8ArrayReader(arr),
-      boundaryString
-    );
+    const reader = new MultipartReader(new Deno.Buffer(arr), boundaryString);
+
+    console.log("boundary:", boundaryString);
     console.log("<req-body>");
     console.log(new TextDecoder("utf-8").decode(arr));
     console.log("</req-body>");
 
-    const result = await reader.readForm(1 << 30 /* 1MB */);
+    const result = await reader.readForm(20);
 
     // get file content
     let file: FormFile;
