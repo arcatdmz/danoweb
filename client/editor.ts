@@ -5,7 +5,7 @@ import _dotenv from "dotenv";
 import * as firebase from "firebase/app";
 import "firebase/database";
 
-import { Editor } from "./editor";
+import { Editor } from "./FirepadEditor";
 
 firebase.initializeApp({
   apiKey: process.env.API_KEY,
@@ -18,9 +18,11 @@ firebase.initializeApp({
 });
 
 window.onload = async function() {
+  // set window title
   const filePath = location.pathname;
   document.title = `${filePath} | denolop`;
 
+  // show the editor
   const editor = new Editor({ filePath });
   try {
     await editor.initialize();
