@@ -1,5 +1,5 @@
-/// <reference path="node_modules/typescript/lib/lib.dom.d.ts" />
-/// <reference path="node_modules/monaco-editor/monaco.d.ts" />
+/// <reference path="../node_modules/typescript/lib/lib.dom.d.ts" />
+/// <reference path="../node_modules/monaco-editor/monaco.d.ts" />
 
 /**
  * Monaco editor on Parcel.js bundler:
@@ -19,7 +19,7 @@ import "firebase/database";
 
 import Firepad from "firepad";
 
-import { getTextFile } from "./api";
+import { getTextFile, putTextFile } from "./api";
 
 export interface EditorOptions {
   filePath?: string;
@@ -62,6 +62,12 @@ export class Editor {
       .ref(`files/${Editor.getFirebasePath(this.options.filePath)}`);
     this.firepad = Firepad.fromMonaco(firepadRef, editor, {
       defaultText
+    });
+  }
+
+  async save() {
+    return putTextFile(this.options.filePath, {
+      content: this.firepad.getText()
     });
   }
 

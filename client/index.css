@@ -19,5 +19,16 @@ body {
   position: absolute;
   left: 0;
   bottom: 0;
-  padding: 1em;
+  padding: 0.5em;
+}
+#controls > button {
+  display: inline-block;
+  background: #eee;
+  border: 1px solid #ccc;
+  border-radius: 0.2em;
+  padding: 0.5em 0.8em;
+  margin-right: 0.5em;
+}
+#controls > button:hover {
+  box-shadow: 1px 1px 3px #999;
 }

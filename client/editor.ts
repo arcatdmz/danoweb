@@ -5,7 +5,7 @@ import _dotenv from "dotenv";
 import * as firebase from "firebase/app";
 import "firebase/database";
 
-import { Editor } from "./FirepadEditor";
+import { Editor } from "./lib/FirepadEditor";
 
 firebase.initializeApp({
   apiKey: process.env.API_KEY,
@@ -30,4 +30,11 @@ window.onload = async function() {
   } catch (e) {
     console.error("editor failed to initialize", e);
   }
+
+  // set event handlers
+  (document.querySelector(
+    "#controls .save"
+  ) as HTMLButtonElement).onclick = _ev => {
+    editor.save();
+  };
 };
