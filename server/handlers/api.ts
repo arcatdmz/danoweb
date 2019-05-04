@@ -1,6 +1,4 @@
-import { Response } from "https://deno.land/std/http/server.ts";
-import { extname } from "https://deno.land/std/fs/path.ts";
-import { contentType } from "https://deno.land/std/media_types/mod.ts";
+import { Response, extname, contentType } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 

@@ -1,9 +1,4 @@
-import {
-  ServerRequest,
-  Response,
-  serve
-} from "https://deno.land/std/http/server.ts";
-import { Status } from "https://deno.land/std/http/http_status.ts";
+import { Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
 

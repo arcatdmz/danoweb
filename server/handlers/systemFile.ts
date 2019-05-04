@@ -1,5 +1,4 @@
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-
 import { serveFile } from "../io.ts";
 
 const { stat } = Deno;

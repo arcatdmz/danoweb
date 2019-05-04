@@ -1,4 +1,4 @@
-import { Status } from "https://deno.land/std/http/http_status.ts";
+import { Status } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveFile } from "../io.ts";
@@ -29,7 +29,7 @@ export class UserFileRequestHandler implements RequestHandler {
     }
   }
 
-  async handleGet(path: string, options: RequestHandlerOptions) {
+  async handleGet(path: string, _options: RequestHandlerOptions) {
     const { userDir, encoder } = this.options;
     const filePath = userDir + path;
     try {
@@ -45,4 +45,30 @@ export class UserFileRequestHandler implements RequestHandler {
       return null;
     }
   }
+}
+
+/**
+ * code from https://github.com/denoland/deno_std/blob/master/http/server.ts#L133
+ * @param it
+ */
+async function readAllIterator(
+  it: AsyncIterableIterator<Uint8Array>
+): Promise<Uint8Array> {
+  const chunks = [];
+  let len = 0;
+  for await (const chunk of it) {
+    chunks.push(chunk);
+    len += chunk.length;
+  }
+  if (chunks.length === 0) {
+    // No need for copy
+    return chunks[0];
+  }
+  const collected = new Uint8Array(len);
+  let offset = 0;
+  for (let chunk of chunks) {
+    collected.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return collected;
 }

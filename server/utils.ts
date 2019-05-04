@@ -3,7 +3,7 @@
  *
  * Utility methods and types
  */
-import { ServerRequest, Response } from "https://deno.land/std/http/server.ts";
+import { ServerRequest, Response } from "./deps.ts";
 
 /**
  * Parse request url to return request path and query parameters

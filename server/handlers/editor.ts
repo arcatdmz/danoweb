@@ -1,8 +1,6 @@
-import { Response } from "https://deno.land/std/http/server.ts";
-import { Status } from "https://deno.land/std/http/http_status.ts";
+import { Response, Status } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-
 import { serveFile } from "../io.ts";
 
 const { stat } = Deno;
