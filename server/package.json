@@ -6,10 +6,10 @@
   "author": "Jun Kato <i@junkato.jp>",
   "license": "MIT",
   "scripts": {
-    "start": "deno --allow-env --allow-net --allow-read mod.ts",
+    "start": "deno --allow-env --allow-net --allow-read server.ts",
     "dev": "yarn cross-env DENO_ENV=development yarn start",
     "build": "cd ../client && yarn build",
-    "build-index": "cd ../client && yarn build-index"
+    "build-editor": "cd ../client && yarn build-editor"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",

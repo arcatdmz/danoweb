@@ -14,9 +14,9 @@ interface QueryParameters {
 const { cwd, env, open, stat } = Deno;
 
 const debug = env()["DENO_ENV"] === "development";
-const userDir = `${cwd()}/src`;
+const userDir = `${cwd()}/public`;
 const systemDir = `${cwd()}/lib`;
-const systemIndexFile = `${systemDir}/index.html`;
+const editorFile = `${systemDir}/editor.html`;
 const address = "127.0.0.1:8000";
 const s = serve(address);
 const te = new TextEncoder();
@@ -143,7 +143,7 @@ async function serveEditor(req: ServerRequest, reqPath: string) {
         status: Status.Unauthorized
       };
     } else {
-      response = await serveFile(systemIndexFile);
+      response = await serveFile(editorFile);
     }
   } catch (e) {
     response = {
