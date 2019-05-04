@@ -43,6 +43,9 @@ const userFileHandler = new UserFileRequestHandler({
 
 // main loop
 async function main() {
+  console.log("server ready at", address);
+  console.log("user dir:", userDir);
+  console.log("sysem dir:", systemDir);
   for await (const req of s) {
     // parse the request
     const { path, query } = parseUrl(req.url);
