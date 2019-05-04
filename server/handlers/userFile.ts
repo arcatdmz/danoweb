@@ -1,7 +1,13 @@
-import { Status, FormFile, isFormFile, MultipartReader } from "../deps.ts";
+import {
+  Status,
+  FormFile,
+  isFormFile,
+  MultipartReader,
+  Response
+} from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile, Uint8ArrayReader } from "../io.ts";
+import { serveFile, StreamReader, Uint8ArrayReader } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -31,7 +37,10 @@ export class UserFileRequestHandler implements RequestHandler {
     }
   }
 
-  async handleGet(path: string, _options: RequestHandlerOptions) {
+  async handleGet(
+    path: string,
+    _options: RequestHandlerOptions
+  ): Promise<Response> {
     const { userDir, encoder } = this.options;
     const filePath = userDir + path;
     try {
@@ -48,7 +57,11 @@ export class UserFileRequestHandler implements RequestHandler {
     }
   }
 
-  async handlePut(path: string, options: RequestHandlerOptions) {
+  async handlePut(
+    path: string,
+    options: RequestHandlerOptions
+  ): Promise<Response> {
+    const { userDir, encoder } = this.options;
     const { req } = options;
 
     // get content-type
@@ -62,30 +75,30 @@ export class UserFileRequestHandler implements RequestHandler {
     const boundaryString = boundary[1];
 
     // parse multipart/form-data
+    // using StreamReader:
+    const stream = req.bodyStream();
+    const reader = new MultipartReader(
+      new StreamReader(stream),
+      boundaryString
+    );
 
-    // fails:
-    // const stream = req.bodyStream();
-    // const reader = new MultipartReader(
-    //   new StreamReader(stream),
-    //   boundaryString
-    // );
-
-    // this one also fails:
+    // using Uint8ArrayReader:
     // const arr = await req.body();
     // const reader = new MultipartReader(
     //   new Uint8ArrayReader(arr),
     //   boundaryString
     // );
 
-    const arr = await req.body();
-    const reader = new MultipartReader(new Deno.Buffer(arr), boundaryString);
+    // using Deno.Buffer:
+    // const arr = await req.body();
+    // const reader = new MultipartReader(new Deno.Buffer(arr), boundaryString);
 
-    console.log("boundary:", boundaryString);
-    console.log("<req-body>");
-    console.log(new TextDecoder("utf-8").decode(arr));
-    console.log("</req-body>");
+    // console.log("boundary:", boundaryString);
+    // console.log("<req-body>");
+    // console.log(new TextDecoder("utf-8").decode(arr));
+    // console.log("</req-body>");
 
-    const result = await reader.readForm(20);
+    const result = await reader.readForm(1 << 30 /* 1MB */);
 
     // get file content
     let file: FormFile;
@@ -96,6 +109,19 @@ export class UserFileRequestHandler implements RequestHandler {
       }
     }
     if (!file) return null;
-    console.log("file posted:", file, path);
+    const headers = new Headers();
+    headers.set("content-type", "application/json");
+    return {
+      body: encoder.encode(
+        JSON.stringify({
+          success: true,
+          path,
+          filename: file.filename,
+          size: file.size,
+          type: file.type
+        })
+      ),
+      headers
+    };
   }
 }
