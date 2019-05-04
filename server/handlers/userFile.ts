@@ -1,7 +1,7 @@
 import { Status, FormFile, isFormFile, MultipartReader } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile } from "../io.ts";
+import { serveFile, Uint8ArrayReader } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -62,8 +62,24 @@ export class UserFileRequestHandler implements RequestHandler {
     const boundaryString = boundary[1];
 
     // parse multipart/form-data
-    const stream = req.bodyStream();
-    const reader = new MultipartReader(new Reader(stream), boundaryString);
+
+    // fails:
+    // const stream = req.bodyStream();
+    // const reader = new MultipartReader(
+    //   new StreamReader(stream),
+    //   boundaryString
+    // );
+
+    // this one also fails:
+    const arr = await req.body();
+    const reader = new MultipartReader(
+      new Uint8ArrayReader(arr),
+      boundaryString
+    );
+    console.log("<req-body>");
+    console.log(new TextDecoder("utf-8").decode(arr));
+    console.log("</req-body>");
+
     const result = await reader.readForm(1 << 30 /* 1MB */);
 
     // get file content
@@ -76,37 +92,5 @@ export class UserFileRequestHandler implements RequestHandler {
     }
     if (!file) return null;
     console.log("file posted:", file, path);
-  }
-}
-
-class Reader {
-  private stream: AsyncIterableIterator<Uint8Array>;
-  private chunk: IteratorResult<Uint8Array>;
-  private chunkOffset: number;
-  constructor(stream: AsyncIterableIterator<Uint8Array>) {
-    this.stream = stream;
-  }
-  async read(p: Uint8Array) {
-    let { stream, chunk, chunkOffset } = this;
-    if (!chunk) {
-      this.chunk = chunk = await stream.next();
-      this.chunkOffset = chunkOffset = 0;
-    }
-    let nread: number;
-    if (chunk.value) {
-      const chunkLeft = chunk.value.byteLength - chunkOffset;
-      nread = Math.min(p.byteLength, chunkLeft);
-      if (nread > 0) p.set(chunk.value);
-      const nothingLeft = chunkOffset + chunkLeft >= chunk.value.byteLength;
-      if (nothingLeft) {
-        this.chunk = null;
-        this.chunkOffset = 0;
-      }
-    } else {
-      nread = 0;
-    }
-    this.chunkOffset += nread;
-    const eof = chunk.done;
-    return { nread, eof };
   }
 }
