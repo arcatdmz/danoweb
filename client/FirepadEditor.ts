@@ -19,7 +19,7 @@ import "firebase/database";
 
 import Firepad from "firepad";
 
-import axios from "axios";
+import { getTextFile } from "./api";
 
 export interface EditorOptions {
   filePath?: string;
@@ -56,12 +56,12 @@ export class Editor {
       automaticLayout: true
     });
 
-    const res = await axios.get(this.options.filePath);
+    const defaultText = await getTextFile(this.options.filePath);
     const firepadRef = firebase
       .database()
       .ref(`files/${Editor.getFirebasePath(this.options.filePath)}`);
     this.firepad = Firepad.fromMonaco(firepadRef, editor, {
-      defaultText: res.data as string
+      defaultText
     });
   }
 
