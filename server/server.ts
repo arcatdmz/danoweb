@@ -1,4 +1,4 @@
-import { Response, serve, Status } from "./deps.ts";
+import { sep, Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
 
@@ -16,9 +16,9 @@ const s = serve(address);
 // prepare stuff
 const environment = env()["DENO_ENV"];
 const debug = environment === "development";
-const userDir = `${cwd()}/public`;
-const systemDir = `${cwd()}/lib`;
-const editorFile = `${systemDir}/editor.html`;
+const userDir = `${cwd() + sep}public`;
+const systemDir = `${cwd() + sep}lib`;
+const editorFile = `${systemDir + sep}editor.html`;
 const encoder = new TextEncoder();
 
 // setup request handlers
