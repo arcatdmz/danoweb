@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "parcel serve index.html --out-dir=../server/lib/",
+    "start": "parcel serve index.html --out-dir=../server/lib/ --public-url /lib/",
     "build": "yarn build-index && yarn build-json && yarn build-css && yarn build-html && yarn build-ts && yarn build-worker",
     "build-index": "parcel build index.html --out-dir=../server/lib/ --public-url /lib/",
     "build-json": "parcel build node_modules/monaco-editor/esm/vs/language/json/json.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
