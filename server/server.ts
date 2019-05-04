@@ -4,29 +4,55 @@ import {
   serve
 } from "https://deno.land/std/http/server.ts";
 import { Status } from "https://deno.land/std/http/http_status.ts";
-import { extname } from "https://deno.land/std/fs/path.ts";
-import { contentType } from "https://deno.land/std/media_types/mod.ts";
 
-interface QueryParameters {
-  [key: string]: string;
-}
+import { parseUrl, RequestHandlerOptions } from "./utils.ts";
 
-const { cwd, env, open, stat } = Deno;
+import { APIRequestHandler } from "./handlers/api.ts";
+import { EditorRequestHandler } from "./handlers/editor.ts";
+import { SystemFileRequestHandler } from "./handlers/systemFile.ts";
+import { UserFileRequestHandler } from "./handlers/userFile.ts";
 
-const debug = env()["DENO_ENV"] === "development";
+const { cwd, env } = Deno;
+
+// start the web server
+const address = "127.0.0.1:8000";
+const s = serve(address);
+
+// prepare stuff
+const environment = env()["DENO_ENV"];
+const debug = environment === "development";
 const userDir = `${cwd()}/public`;
 const systemDir = `${cwd()}/lib`;
 const editorFile = `${systemDir}/editor.html`;
-const address = "127.0.0.1:8000";
-const s = serve(address);
-const te = new TextEncoder();
+const encoder = new TextEncoder();
 
+// setup request handlers
+const apiHandler = new APIRequestHandler({
+  encoder,
+  address,
+  environment,
+  debug
+});
+const editorHandler = new EditorRequestHandler({
+  encoder,
+  userDir,
+  editorFile
+});
+const systemFileHandler = new SystemFileRequestHandler({
+  systemDir
+});
+const userFileHandler = new UserFileRequestHandler({
+  encoder,
+  userDir
+});
+
+// main loop
 async function main() {
   for await (const req of s) {
     switch (req.method.toLowerCase()) {
       case "post":
         req.respond({
-          body: te.encode("Not implemented\n"),
+          body: encoder.encode("Not implemented\n"),
           status: Status.NotImplemented
         });
         break;
@@ -38,136 +64,23 @@ async function main() {
 }
 
 async function handleGet(req: ServerRequest) {
-  // parse query string
-  const paths = req.url.split("?");
-  let query: QueryParameters = {};
-  if (paths.length > 1) {
-    paths[1].split("&").forEach(q_ => {
-      const q = q_.split("=");
-      if (q.length < 2) {
-        query[decodeURIComponent(q[0])] = null;
-      } else {
-        const [key, value] = q;
-        query[decodeURIComponent(key)] = decodeURIComponent(value);
-      }
-    });
-  }
-
-  // parse request path
-  const reqPath = paths[0].replace(/\/$/, "");
-
-  // handle API request
-  if (reqPath.indexOf("/api/") === 0) {
-    const api = handleAPIRequest(req, reqPath.substr("/api".length), query);
-    if (api) return api;
-  }
-
-  // handle edit request
-  if (query.mode === "edit") {
-    return serveEditor(req, reqPath);
-  }
-
-  // serve a file
-  return (await serveSystemFile(req, reqPath)) || serveUserFile(req, reqPath);
-}
-
-function handleAPIRequest(
-  req: ServerRequest,
-  reqPath: string,
-  query: QueryParameters
-) {
-  let response: Response;
-  if (reqPath === "/server") {
-    response = {
-      body: te.encode(JSON.stringify({ address, debug }))
-    };
-  }
-  if (response) {
-    const headers = new Headers();
-    headers.set("content-type", contentType(extname(reqPath)));
-    response.headers = headers;
-    return req.respond(response);
-  }
-  return null;
-}
-
-async function serveSystemFile(req: ServerRequest, reqPath: string) {
-  if (reqPath.indexOf("/lib/") !== 0) return false;
-  const filePath = systemDir + reqPath.substr("/lib".length);
-  try {
-    const fileInfo = await stat(filePath);
-    if (fileInfo.isDirectory()) {
-      return serveSystemFile(
-        req,
-        (reqPath.substr(-1) === "/" ? "" : "/") + "index.html"
-      );
-    }
-    await req.respond(await serveFile(filePath));
-    return true;
-  } catch (e) {
-    return false;
-  }
-}
-
-async function serveUserFile(req: ServerRequest, reqPath: string) {
-  const filePath = userDir + reqPath;
-  let response: Response;
-  try {
-    const fileInfo = await stat(filePath);
-    if (fileInfo.isDirectory()) {
-      response = {
-        body: te.encode("Directory listing prohibited\n"),
-        status: Status.Unauthorized
-      };
-    } else {
-      response = await serveFile(filePath);
-    }
-  } catch (e) {
-    response = {
-      body: te.encode("File not found\n"),
-      status: Status.NotFound
-    };
-  } finally {
-    req.respond(response);
-  }
-}
-
-async function serveEditor(req: ServerRequest, reqPath: string) {
-  const filePath = userDir + reqPath;
-  let response: Response;
-  try {
-    const fileInfo = await stat(filePath);
-    if (fileInfo.isDirectory()) {
-      response = {
-        body: te.encode("Directory listing prohibited\n"),
-        status: Status.Unauthorized
-      };
-    } else {
-      response = await serveFile(editorFile);
-    }
-  } catch (e) {
-    response = {
-      body: te.encode("File not found\n"),
-      status: Status.NotFound
-    };
-  } finally {
-    req.respond(response);
-  }
-}
-
-async function serveFile(filePath: string): Promise<Response> {
-  const mediaType = contentType(extname(filePath)) || "text/plain";
-  const file = await open(filePath);
-  const fileInfo = await stat(filePath);
-  const headers = new Headers();
-  headers.set("content-length", fileInfo.len.toString());
-  headers.set("content-type", mediaType);
-  const res = {
-    body: file,
-    status: Status.OK,
-    headers
+  const { path, query } = parseUrl(req.url);
+  const options: RequestHandlerOptions = {
+    req,
+    query
   };
-  return res;
+  let res: Response =
+    (await apiHandler.handle(path, options)) ||
+    (await editorHandler.handle(path, options)) ||
+    (await systemFileHandler.handle(path, options)) ||
+    (await userFileHandler.handle(path, options));
+  if (!res) {
+    res = {
+      body: encoder.encode("File not found\n"),
+      status: Status.NotFound
+    };
+  }
+  return req.respond(res);
 }
 
 main();
