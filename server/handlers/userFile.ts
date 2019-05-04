@@ -1,4 +1,4 @@
-import { Status } from "../deps.ts";
+import { Status, FormFile, isFormFile, MultipartReader } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveFile } from "../io.ts";
@@ -24,6 +24,8 @@ export class UserFileRequestHandler implements RequestHandler {
     switch (options.method) {
       case "get":
         return this.handleGet(path, options);
+      case "put":
+        return this.handlePut(path, options);
       default:
         return null;
     }
@@ -45,30 +47,66 @@ export class UserFileRequestHandler implements RequestHandler {
       return null;
     }
   }
+
+  async handlePut(path: string, options: RequestHandlerOptions) {
+    const { req } = options;
+
+    // get content-type
+    const contentType = req.headers.get("content-type");
+    const params = contentType.split(";");
+    if (params[0] !== "multipart/form-data" || params.length < 2) return null;
+
+    // get boundary string
+    const boundary = /^\s*boundary="?(.+)"?$/.exec(params[1]);
+    if (!boundary) return null;
+    const boundaryString = boundary[1];
+
+    // parse multipart/form-data
+    const stream = req.bodyStream();
+    const reader = new MultipartReader(new Reader(stream), boundaryString);
+    const result = await reader.readForm(1 << 30 /* 1MB */);
+
+    // get file content
+    let file: FormFile;
+    for (let key in result) {
+      if (isFormFile(result[key])) file = result[key] as FormFile;
+      else {
+        // handle the other parameters
+      }
+    }
+    if (!file) return null;
+    console.log("file posted:", file, path);
+  }
 }
 
-/**
- * code from https://github.com/denoland/deno_std/blob/master/http/server.ts#L133
- * @param it
- */
-async function readAllIterator(
-  it: AsyncIterableIterator<Uint8Array>
-): Promise<Uint8Array> {
-  const chunks = [];
-  let len = 0;
-  for await (const chunk of it) {
-    chunks.push(chunk);
-    len += chunk.length;
+class Reader {
+  private stream: AsyncIterableIterator<Uint8Array>;
+  private chunk: IteratorResult<Uint8Array>;
+  private chunkOffset: number;
+  constructor(stream: AsyncIterableIterator<Uint8Array>) {
+    this.stream = stream;
   }
-  if (chunks.length === 0) {
-    // No need for copy
-    return chunks[0];
+  async read(p: Uint8Array) {
+    let { stream, chunk, chunkOffset } = this;
+    if (!chunk) {
+      this.chunk = chunk = await stream.next();
+      this.chunkOffset = chunkOffset = 0;
+    }
+    let nread: number;
+    if (chunk.value) {
+      const chunkLeft = chunk.value.byteLength - chunkOffset;
+      nread = Math.min(p.byteLength, chunkLeft);
+      if (nread > 0) p.set(chunk.value);
+      const nothingLeft = chunkOffset + chunkLeft >= chunk.value.byteLength;
+      if (nothingLeft) {
+        this.chunk = null;
+        this.chunkOffset = 0;
+      }
+    } else {
+      nread = 0;
+    }
+    this.chunkOffset += nread;
+    const eof = chunk.done;
+    return { nread, eof };
   }
-  const collected = new Uint8Array(len);
-  let offset = 0;
-  for (let chunk of chunks) {
-    collected.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return collected;
 }
