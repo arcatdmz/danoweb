@@ -21,6 +21,15 @@ export class UserFileRequestHandler implements RequestHandler {
   }
 
   async handle(path: string, options: RequestHandlerOptions) {
+    switch (options.method) {
+      case "get":
+        return this.handleGet(path, options);
+      default:
+        return null;
+    }
+  }
+
+  async handleGet(path: string, options: RequestHandlerOptions) {
     const { userDir, encoder } = this.options;
     const filePath = userDir + path;
     try {

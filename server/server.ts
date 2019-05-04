@@ -49,26 +49,47 @@ const userFileHandler = new UserFileRequestHandler({
 // main loop
 async function main() {
   for await (const req of s) {
-    switch (req.method.toLowerCase()) {
+    // parse the request
+    const { path, query } = parseUrl(req.url);
+    const method = req.method.toLowerCase();
+    const options: RequestHandlerOptions = {
+      req,
+      method,
+      query
+    };
+
+    // handle the request
+    let response: Response;
+    switch (method) {
       case "get":
-        handleGet(req);
+        response = await handleGet(path, options);
+        break;
+      case "put":
+        response = await handlePut(path, options);
         break;
       default:
-        req.respond({
+        response = {
           body: encoder.encode("Not implemented\n"),
           status: Status.NotImplemented
-        });
+        };
         break;
     }
+    req.respond(response);
+
+    // verbose logging
+    console.log(
+      JSON.stringify({
+        time: new Date(),
+        method,
+        path,
+        query,
+        status: response.status || Status.OK
+      })
+    );
   }
 }
 
-async function handleGet(req: ServerRequest) {
-  const { path, query } = parseUrl(req.url);
-  const options: RequestHandlerOptions = {
-    req,
-    query
-  };
+async function handleGet(path: string, options: RequestHandlerOptions) {
   let res: Response =
     (await apiHandler.handle(path, options)) ||
     (await editorHandler.handle(path, options)) ||
@@ -80,7 +101,18 @@ async function handleGet(req: ServerRequest) {
       status: Status.NotFound
     };
   }
-  return req.respond(res);
+  return res;
+}
+
+async function handlePut(path: string, options: RequestHandlerOptions) {
+  let res: Response = await userFileHandler.handle(path, options);
+  if (!res) {
+    res = {
+      body: encoder.encode("Internal server error\n"),
+      status: Status.InternalServerError
+    };
+  }
+  return res;
 }
 
 main();
