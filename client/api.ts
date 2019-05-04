@@ -9,8 +9,24 @@ export interface APIOptions {
   endpoint?: string;
 }
 
-export async function getTextFile(filePath: string, options: APIOptions) {
+export async function getTextFile(filePath: string, options?: APIOptions) {
   const res = await axios.get(getEndpoint(options) + filePath);
+  return res.data as string;
+}
+
+export async function putTextFile(
+  filePath: string,
+  options: APIOptions & { content: string }
+) {
+  const fileName = filePath.substr(filePath.lastIndexOf("/") + 1);
+  const formData = new FormData();
+  formData.append("path", filePath);
+  formData.append(
+    "content",
+    new Blob([options.content], { type: "text/plain" }),
+    fileName
+  );
+  const res = await axios.put(getEndpoint(options) + filePath, formData);
   return res.data as string;
 }
 
