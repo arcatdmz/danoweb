@@ -17,10 +17,12 @@
     "axios": "^0.18.0",
     "firebase": "^5.11.0",
     "firepad": "^1.5.3",
+    "js-cookie": "^2.2.0",
     "milligram": "^1.3.0",
     "monaco-editor": "^0.16.2"
   },
   "devDependencies": {
+    "@types/js-cookie": "^2.2.2",
     "parcel-bundler": "^1.12.3",
     "typescript": "^3.4.5"
   }

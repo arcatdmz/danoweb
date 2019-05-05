@@ -4,9 +4,35 @@
  * Functions to call server APIs
  */
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export interface APIOptions {
   endpoint?: string;
+}
+
+export async function authenticate(token: string, options?: APIOptions) {
+  try {
+    const res = await axios.post(getEndpoint(options) + "/lib/api/auth", null, {
+      auth: {
+        username: "denolop",
+        password: token
+      }
+    });
+    if (!res.data || !res.data.success) {
+      return false;
+    }
+    Cookies.set("token", token, {
+      expires: 60 /* days */
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function isAuthenticated() {
+  const token = Cookies.get("token");
+  return token && authenticate(token);
 }
 
 export async function getTextFile(filePath: string, options?: APIOptions) {
@@ -33,7 +59,7 @@ export async function putTextFile(
   const res = await axios.put(getEndpoint(options) + filePath, formData, {
     auth: {
       username: "denolop",
-      password: "test"
+      password: Cookies.get("token")
     }
   });
   return res.data as string;

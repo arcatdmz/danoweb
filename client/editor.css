@@ -18,7 +18,7 @@
 #diff-controls {
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: 0.5rem;
   padding: 0 1rem;
 }
 #firepad-controls {
@@ -27,4 +27,12 @@
 #diff-controls {
   display: none;
   z-index: 4;
+}
+
+#authenticate {
+  z-index: 5;
+}
+
+#overlay {
+  z-index: 10;
 }

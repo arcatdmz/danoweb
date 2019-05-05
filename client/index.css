@@ -14,9 +14,36 @@ body {
   position: relative;
 }
 
+.modal {
+  position: absolute;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.7);
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+}
+.modal > .modal-content {
+  max-width: 640px;
+}
+.modal.enabled {
+  display: flex;
+  transition: 0.1s opacity ease-out;
+  opacity: 0;
+}
+.modal.enabled.active {
+  transition: 0.3s opacity ease-out;
+  opacity: 1;
+}
+
 .buttons a.button,
 .buttons button {
   margin-right: 0.7rem;
+}
+.buttons a.button:last-child,
+.buttons button:last-child {
+  margin-right: 2px;
 }
 a.button:hover,
 button:hover {
