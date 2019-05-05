@@ -1,6 +1,7 @@
 import { sep, Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
+import { serveFile } from "./io.ts";
 
 import { APIRequestHandler } from "./handlers/api.ts";
 import { EditorRequestHandler } from "./handlers/editor.ts";
@@ -19,6 +20,7 @@ const debug = environment === "development";
 const userDir = `${cwd() + sep}public`;
 const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
+const notfoundFile = `${systemDir + sep}notfound.html`;
 const encoder = new TextEncoder();
 
 // setup request handlers
@@ -94,10 +96,8 @@ async function handleGet(path: string, options: RequestHandlerOptions) {
     (await systemFileHandler.handle(path, options)) ||
     (await userFileHandler.handle(path, options));
   if (!res) {
-    res = {
-      body: encoder.encode("File not found\n"),
-      status: Status.NotFound
-    };
+    res = await serveFile(notfoundFile);
+    res.status = Status.NotFound;
   }
   return res;
 }

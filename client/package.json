@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "parcel serve editor.html --out-dir=../server/lib/ --public-url /lib/",
-    "build": "yarn build-editor && yarn build-json && yarn build-css && yarn build-html && yarn build-ts && yarn build-worker",
-    "build-editor": "parcel build editor.html --out-dir=../server/lib/ --public-url /lib/",
+    "start": "parcel serve *.html --out-dir=../server/lib/ --public-url /lib/",
+    "build": "yarn build-pages && yarn build-json && yarn build-css && yarn build-html && yarn build-ts && yarn build-worker",
+    "build-pages": "parcel build *.html --out-dir=../server/lib/ --public-url /lib/",
     "build-json": "parcel build node_modules/monaco-editor/esm/vs/language/json/json.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
     "build-css": "parcel build node_modules/monaco-editor/esm/vs/language/css/css.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
     "build-html": "parcel build node_modules/monaco-editor/esm/vs/language/html/html.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/",
@@ -17,6 +17,7 @@
     "axios": "^0.18.0",
     "firebase": "^5.11.0",
     "firepad": "^1.5.3",
+    "milligram": "^1.3.0",
     "monaco-editor": "^0.16.2"
   },
   "devDependencies": {

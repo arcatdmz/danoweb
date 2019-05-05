@@ -9,7 +9,7 @@
     "start": "deno --allow-env --allow-net --allow-read server.ts",
     "dev": "yarn cross-env DENO_ENV=development yarn start",
     "build": "cd ../client && yarn build",
-    "build-editor": "cd ../client && yarn build-editor"
+    "build-editor": "cd ../client && yarn build-pages"
   },
   "devDependencies": {
     "cross-env": "^5.2.0",
