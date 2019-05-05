@@ -32,7 +32,7 @@ yarn start
 
 ## environment variables
 
-before starting the server, put `.env` file in `./client/`
+before starting the server, put `.env` file in `./client/` -- these values can be retrieved from the [firebase](https://firebase.google.com/docs/database/) website
 
 ```sh
 API_KEY={YOUR_FIREBASE_API_KEY}
@@ -44,6 +44,13 @@ MESSAGING_SENDER_ID={YOUR_MESSAGING_SENDER_ID}
 APP_ID={YOUR_APP_ID}
 ```
 
+optionally put `.env` file in `./server/` -- default values are shown below
+
+```sh
+USER_DIR=./public
+PORT=8000
+```
+
 ---
 
-https://github.com/arcatdmz/denolop
+https://github.com/arcatdmz/danoweb
