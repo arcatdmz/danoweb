@@ -10,6 +10,7 @@ export interface APIRequestHandlerOptions {
   environment: string;
   debug: boolean;
   auth: AuthHandler;
+  systemPath: string;
 }
 
 /**
@@ -23,8 +24,9 @@ export class APIRequestHandler implements RequestHandler {
   }
 
   async handle(path: string, options: RequestHandlerOptions) {
-    if (path.indexOf("/api/") !== 0) return null;
-    path = path.substr("/api".length);
+    const pathPrefix = this.options.systemPath + "/api";
+    if (path.indexOf(`${pathPrefix}/`) !== 0) return null;
+    path = path.substr(pathPrefix.length);
 
     return this.server(path, options) || this.auth(path, options);
   }

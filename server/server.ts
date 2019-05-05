@@ -18,6 +18,7 @@ const s = serve(address);
 // prepare stuff
 const environment = env()["DENO_ENV"];
 const debug = environment === "development";
+const systemPath = "/lib";
 const userDir = `${cwd() + sep}public`;
 const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
@@ -31,7 +32,8 @@ const apiHandler = new APIRequestHandler({
   address,
   environment,
   debug,
-  auth
+  auth,
+  systemPath
 });
 const editorHandler = new EditorRequestHandler({
   encoder,
@@ -40,7 +42,8 @@ const editorHandler = new EditorRequestHandler({
 });
 const systemFileHandler = new SystemFileRequestHandler({
   encoder,
-  systemDir
+  systemDir,
+  systemPath
 });
 const userFileHandler = new UserFileRequestHandler({
   encoder,

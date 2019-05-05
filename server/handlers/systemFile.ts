@@ -8,6 +8,7 @@ const { stat } = Deno;
 export interface SystemFileRequestHandlerOptions {
   encoder: TextEncoder;
   systemDir: string;
+  systemPath: string;
 }
 
 /**
@@ -21,9 +22,10 @@ export class SystemFileRequestHandler implements RequestHandler {
   }
 
   async handle(path: string, options: RequestHandlerOptions) {
-    const { encoder, systemDir } = this.options;
-    if (path === "/lib" || path.indexOf("/lib/") !== 0) return null;
-    const filePath = systemDir + path.substr("/lib".length);
+    const { encoder, systemDir, systemPath } = this.options;
+    if (path === systemPath || path.indexOf(`${systemPath}/`) !== 0)
+      return null;
+    const filePath = systemDir + path.substr(systemPath.length);
     try {
       const fileInfo = await stat(filePath);
       if (fileInfo.isDirectory()) {
