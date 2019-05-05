@@ -8,6 +8,9 @@ import {
   Status,
   extname,
   sep,
+  posix,
+  win32,
+  ensureDir,
   move,
   contentType,
   FormFile
@@ -40,6 +43,11 @@ export function serveJSON(json: any, encoder: TextEncoder): Response {
 }
 
 export async function saveFormFile(formFile: FormFile, path: string) {
+  // ensure that the parent directory exists
+  const { dirname } = sep === "\\" ? win32 : posix;
+  await ensureDir(dirname(path));
+
+  // save the file
   if (formFile.tempfile) {
     return move(formFile.tempfile, path, { overwrite: true });
   } else {

@@ -24,25 +24,19 @@ export class EditorRequestHandler implements RequestHandler {
   async handle(path: string, options: RequestHandlerOptions) {
     if (options.query.mode !== "edit") return null;
     const { encoder, userDir, editorFile: editorPath } = this.options;
-
     const filePath = userDir + path;
-    let response: Response;
     try {
       const fileInfo = await stat(filePath);
       if (fileInfo.isDirectory()) {
-        response = {
+        return {
           body: encoder.encode("Directory listing prohibited\n"),
           status: Status.Unauthorized
         };
-      } else {
-        response = await serveFile(editorPath);
       }
     } catch (e) {
-      response = {
-        body: encoder.encode("File not found\n"),
-        status: Status.NotFound
-      };
+      // file not found
+    } finally {
+      return serveFile(editorPath);
     }
-    return response;
   }
 }

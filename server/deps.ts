@@ -13,8 +13,8 @@ import {
   MultipartReader
 } from "https://denopkg.com/arcatdmz/deno_std/multipart/multipart.ts";
 
-import { move } from "https://deno.land/std/fs/mod.ts";
-import { extname, sep } from "https://deno.land/std/fs/path.ts";
+import { ensureDir, move } from "https://deno.land/std/fs/mod.ts";
+import { extname, sep, posix, win32 } from "https://deno.land/std/fs/path.ts";
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
 
 export {
@@ -26,6 +26,9 @@ export {
   isFormFile,
   MultipartWriter,
   MultipartReader,
+  posix,
+  win32,
+  ensureDir,
   move,
   extname,
   sep,

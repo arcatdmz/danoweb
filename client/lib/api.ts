@@ -10,8 +10,12 @@ export interface APIOptions {
 }
 
 export async function getTextFile(filePath: string, options?: APIOptions) {
-  const res = await axios.get(getEndpoint(options) + filePath);
-  return res.data as string;
+  try {
+    const res = await axios.get(getEndpoint(options) + filePath);
+    return res.data as string;
+  } catch (_e) {
+    return null;
+  }
 }
 
 export async function putTextFile(
