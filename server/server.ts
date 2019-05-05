@@ -10,12 +10,17 @@ import { SystemFileRequestHandler } from "./handlers/systemFile.ts";
 import { UserFileRequestHandler } from "./handlers/userFile.ts";
 
 // load .env and get environment variables
-const dotenv = config({ export: true });
+let dotenv: any;
+try {
+  dotenv = config({ export: true });
+} catch (e) {
+  dotenv = {};
+}
 const { cwd, env: env_ } = Deno;
 const env = env_();
 
 // start the web server
-const address = `127.0.0.1:${env.PORT || 8000}`;
+const address = `${env.HOST || "127.0.0.1"}:${env.PORT || 8000}`;
 const s = serve(address);
 
 // prepare stuff

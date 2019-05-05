@@ -2,10 +2,19 @@
 
 **d**istributed **a**uthoring environment built with de**no** for the **web**
 
-## install
+## docker build and run
 
-1. install `deno`
+1. see "environment variables" section and put `.env` files accordingly
+2. docker build and run
 
+```sh
+docker build . -t danoweb
+docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb
+```
+
+## build
+
+1. install `deno` (tested with `v0.4.0`)
 2. build client-side code (requires `yarn`)
 
 ```sh
@@ -20,7 +29,7 @@ start the server with `deno`
 
 ```sh
 cd server/
-deno --allow-env --allow-net --allow-read server.ts
+deno run --allow-env --allow-net --allow-read --allow-write server.ts
 ```
 
 or `yarn`
@@ -32,7 +41,7 @@ yarn start
 
 ## environment variables
 
-before starting the server, put `.env` file in `./client/` -- these values can be retrieved from the [firebase](https://firebase.google.com/docs/database/) website
+- before starting the server, put `.env` file in `./client/` -- these values can be retrieved from the [firebase](https://firebase.google.com/docs/database/) website
 
 ```sh
 API_KEY={YOUR_FIREBASE_API_KEY}
@@ -45,10 +54,12 @@ APP_ID={YOUR_APP_ID}
 DATABASE_PREFIX={PATH_PREFIX_FOR_YOUR_DATABASE(optional)}
 ```
 
-optionally put `.env` file in `./server/` -- default values are shown below
+- optionally put `.env` file in `./server/` -- default values are shown below
+- do NOT put this file when the application runs in a Docker container
 
 ```sh
 USER_DIR=./public
+HOST=127.0.0.1
 PORT=8000
 ```
 
