@@ -23,7 +23,7 @@ firebase.initializeApp({
 window.onload = async function() {
   // set window title
   const filePath = location.pathname;
-  document.title = `${filePath} | denolop`;
+  document.title = `${filePath} | danoweb`;
 
   // show the editor
   const editor = new Editor({ filePath });

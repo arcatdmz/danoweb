@@ -14,7 +14,7 @@ export async function authenticate(token: string, options?: APIOptions) {
   try {
     const res = await axios.post(getEndpoint(options) + "/lib/api/auth", null, {
       auth: {
-        username: "denolop",
+        username: "danoweb",
         password: token
       }
     });
@@ -58,7 +58,7 @@ export async function putTextFile(
   );
   const res = await axios.put(getEndpoint(options) + filePath, formData, {
     auth: {
-      username: "denolop",
+      username: "danoweb",
       password: Cookies.get("token")
     }
   });

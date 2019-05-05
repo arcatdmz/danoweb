@@ -1,8 +1,8 @@
 {
-  "name": "denolop",
+  "name": "danoweb",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "git@github.com:arcatdmz/denolop.git",
+  "repository": "git@github.com:arcatdmz/danoweb.git",
   "author": "Jun Kato <i@junkato.jp>",
   "license": "MIT",
   "scripts": {

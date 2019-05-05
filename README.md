@@ -1,6 +1,6 @@
-# denolop
+# danoweb
 
-denolopment environment
+**d**istributed **a**uthoring environment built with de**no** for the **web**
 
 ## install
 

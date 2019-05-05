@@ -1,7 +1,7 @@
 import { sep, Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
-import { serveFile } from "./io.ts";
+import { serveFile, serveJSON } from "./io.ts";
 import { BasicAuthHandler } from "./auth.ts";
 
 import { APIRequestHandler } from "./handlers/api.ts";
@@ -24,7 +24,7 @@ const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
 const notfoundFile = `${systemDir + sep}notfound.html`;
 const encoder = new TextEncoder();
-const auth = new BasicAuthHandler({ denolop: "test" });
+const auth = new BasicAuthHandler({ danoweb: "test" });
 
 // setup request handlers
 const apiHandler = new APIRequestHandler({
@@ -67,22 +67,28 @@ async function main() {
     };
 
     // handle the request
-    let response: Response;
+    let res: Response;
     switch (method) {
       case "get":
-        response = await handleGet(path, options);
+        res = await handleGet(path, options);
+        break;
+      case "post":
+        res = await handlePost(path, options);
         break;
       case "put":
-        response = await handlePut(path, options);
+        res = await handlePut(path, options);
         break;
       default:
-        response = {
-          body: encoder.encode("Not implemented\n"),
-          status: Status.NotImplemented
-        };
+        res = serveJSON(
+          {
+            error: "not implemented\n"
+          },
+          encoder
+        );
+        res.status = Status.NotImplemented;
         break;
     }
-    req.respond(response);
+    req.respond(res);
 
     // verbose logging
     console.log(
@@ -91,7 +97,7 @@ async function main() {
         method,
         path,
         query,
-        status: response.status || Status.OK
+        status: res.status || Status.OK
       })
     );
   }
@@ -110,13 +116,30 @@ async function handleGet(path: string, options: RequestHandlerOptions) {
   return res;
 }
 
+async function handlePost(path: string, options: RequestHandlerOptions) {
+  let res: Response = await apiHandler.handle(path, options);
+  if (!res) {
+    res = serveJSON(
+      {
+        error: "not found"
+      },
+      encoder
+    );
+    res.status = Status.NotFound;
+  }
+  return res;
+}
+
 async function handlePut(path: string, options: RequestHandlerOptions) {
   let res: Response = await userFileHandler.handle(path, options);
   if (!res) {
-    res = {
-      body: encoder.encode("Internal server error\n"),
-      status: Status.InternalServerError
-    };
+    res = serveJSON(
+      {
+        error: "internal server error"
+      },
+      encoder
+    );
+    res.status = Status.InternalServerError;
   }
   return res;
 }
