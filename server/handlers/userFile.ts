@@ -8,7 +8,7 @@ import {
 } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile, saveFormFile, StreamReader } from "../io.ts";
+import { serveFile, serveJSON, saveFormFile, StreamReader } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -49,10 +49,6 @@ export class UserFileRequestHandler implements RequestHandler {
 
     // return JSON if query contains `action=check`
     const check = query.action === "check";
-    const headers = new Headers();
-    if (check) {
-      headers.set("content-type", "application/json");
-    }
 
     // get info
     try {
@@ -60,29 +56,19 @@ export class UserFileRequestHandler implements RequestHandler {
 
       // path points to a directory
       if (fileInfo.isDirectory()) {
-        return {
-          body: encoder.encode(
-            JSON.stringify({ success: true, type: "directory" })
-          ),
-          status: check ? Status.Unauthorized : undefined,
-          headers
-        };
+        const res = serveJSON({ success: true, type: "directory" }, encoder);
+        if (check) res.status = Status.Unauthorized;
+        return res;
       }
 
       // path points to a file
       if (check) {
-        return {
-          body: encoder.encode(JSON.stringify({ success: true, type: "file" })),
-          headers
-        };
+        return serveJSON({ success: true, type: "file" }, encoder);
       }
       return await serveFile(filePath);
     } catch (e) {
       if (check) {
-        return {
-          body: encoder.encode(JSON.stringify({ success: false })),
-          headers
-        };
+        return serveJSON({ success: false }, encoder);
       }
       return null;
     }
@@ -129,15 +115,17 @@ export class UserFileRequestHandler implements RequestHandler {
     // console.log(new TextDecoder("utf-8").decode(arr));
     // console.log("</req-body>");
 
-    const result = await reader.readForm(1 << 30 /* 1MB */);
-
     // get file content
+    const result = await reader.readForm(1 << 30 /* 1MB */);
     const file = result["content"] as FormFile;
     let json: any, status: number;
     if (isFormFile(file)) {
       try {
+        // save file
         const filePath = (userDir + path).replace(/\//g, sep);
         await saveFormFile(file, filePath);
+
+        // return file overview
         json = {
           success: true,
           path,
@@ -152,12 +140,8 @@ export class UserFileRequestHandler implements RequestHandler {
       json = { success: false, error: "no file submitted" };
       status = Status.BadRequest;
     }
-    const headers = new Headers();
-    headers.set("content-type", "application/json");
-    return {
-      body: encoder.encode(JSON.stringify(json)),
-      headers,
-      status
-    };
+    const res = serveJSON(json, encoder);
+    res.status = status;
+    return res;
   }
 }

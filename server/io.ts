@@ -30,6 +30,15 @@ export async function serveFile(filePath: string): Promise<Response> {
   };
 }
 
+export function serveJSON(json: any, encoder: TextEncoder): Response {
+  const headers = new Headers();
+  headers.set("content-type", "application/json");
+  return {
+    body: encoder.encode(JSON.stringify(json)),
+    headers
+  };
+}
+
 export async function saveFormFile(formFile: FormFile, path: string) {
   if (formFile.tempfile) {
     return move(formFile.tempfile, path, { overwrite: true });

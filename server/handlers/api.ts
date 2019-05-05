@@ -1,6 +1,7 @@
 import { Response, extname, contentType } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
+import { serveJSON } from "../io";
 
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
@@ -35,8 +36,6 @@ export class APIRequestHandler implements RequestHandler {
   server(path: string, _options: RequestHandlerOptions) {
     if (path !== "/server") return null;
     const { encoder, address, debug } = this.options;
-    return {
-      body: encoder.encode(JSON.stringify({ address, debug }))
-    };
+    return serveJSON({ address, debug }, encoder);
   }
 }
