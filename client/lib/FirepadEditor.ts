@@ -19,6 +19,8 @@ import "firebase/database";
 
 import Firepad from "firepad";
 
+import _dotenv from "dotenv";
+
 import { getTextFile, putTextFile } from "./api";
 import { setupMonaco, getMonacoLanguage } from "./utils";
 
@@ -62,6 +64,9 @@ export class Editor {
   }
 
   static getFirebasePath(filePath: string) {
-    return encodeURIComponent(filePath).replace(/\./g, "%2E");
+    return (
+      (process.env.DATABASE_PREFIX || "") +
+      encodeURIComponent(filePath).replace(/\./g, "%2E")
+    );
   }
 }
