@@ -39,20 +39,50 @@ export class UserFileRequestHandler implements RequestHandler {
 
   async handleGet(
     path: string,
-    _options: RequestHandlerOptions
+    options: RequestHandlerOptions
   ): Promise<Response> {
+    // get parameters
     const { userDir, encoder } = this.options;
+    const { query } = options;
     const filePath = userDir + path;
+
+    // return JSON if query contains `action=check`
+    const check = query.action === "check";
+    const headers = new Headers();
+    if (check) {
+      headers.set("content-type", "application/json");
+    }
+
+    // get info
     try {
       const fileInfo = await stat(filePath);
+
+      // path points to a directory
       if (fileInfo.isDirectory()) {
         return {
-          body: encoder.encode("Directory listing prohibited\n"),
-          status: Status.Unauthorized
+          body: encoder.encode(
+            JSON.stringify({ success: true, type: "directory" })
+          ),
+          status: check ? Status.Unauthorized : undefined,
+          headers
+        };
+      }
+
+      // path points to a file
+      if (check) {
+        return {
+          body: encoder.encode(JSON.stringify({ success: true, type: "file" })),
+          headers
         };
       }
       return await serveFile(filePath);
     } catch (e) {
+      if (check) {
+        return {
+          body: encoder.encode(JSON.stringify({ success: false })),
+          headers
+        };
+      }
       return null;
     }
   }
