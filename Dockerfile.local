@@ -1,0 +1,4 @@
+FROM danoweb:latest
+
+EXPOSE 8000
+CMD cd /work/server && yarn start

@@ -9,12 +9,13 @@
 
 ```sh
 docker build . -t danoweb
-docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb
+docker build . --file Dockerfile.local -t danoweb:local
+docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
 ```
 
 ## build
 
-1. install `deno` (tested with `v0.4.0`)
+1. install `deno` (tested with `v0.3.10`)
 2. build client-side code (requires `yarn`)
 
 ```sh
@@ -29,7 +30,7 @@ start the server with `deno`
 
 ```sh
 cd server/
-deno run --allow-env --allow-net --allow-read --allow-write server.ts
+deno --allow-env --allow-net --allow-read --allow-write server.ts
 ```
 
 or `yarn`
