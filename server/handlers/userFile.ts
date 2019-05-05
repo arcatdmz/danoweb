@@ -57,7 +57,7 @@ export class UserFileRequestHandler implements RequestHandler {
       // path points to a directory
       if (fileInfo.isDirectory()) {
         const res = serveJSON({ success: true, type: "directory" }, encoder);
-        if (check) res.status = Status.Unauthorized;
+        if (check) res.status = Status.Forbidden;
         return res;
       }
 

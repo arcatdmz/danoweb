@@ -30,7 +30,7 @@ export class EditorRequestHandler implements RequestHandler {
       if (fileInfo.isDirectory()) {
         return {
           body: encoder.encode("Directory listing prohibited\n"),
-          status: Status.Unauthorized
+          status: Status.Forbidden
         };
       }
     } catch (e) {

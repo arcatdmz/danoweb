@@ -36,6 +36,7 @@ const editorHandler = new EditorRequestHandler({
   editorFile
 });
 const systemFileHandler = new SystemFileRequestHandler({
+  encoder,
   systemDir
 });
 const userFileHandler = new UserFileRequestHandler({
