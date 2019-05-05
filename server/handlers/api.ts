@@ -1,7 +1,7 @@
 import { Response, extname, contentType } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveJSON } from "../io";
+import { serveJSON } from "../io.ts";
 
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
