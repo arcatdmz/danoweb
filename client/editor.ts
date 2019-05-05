@@ -33,7 +33,7 @@ window.onload = async function() {
 
   // set event handlers
   (document.querySelector(
-    "#controls .save"
+    "#firepad-controls .save"
   ) as HTMLButtonElement).onclick = _ev => {
     editor.save();
   };
