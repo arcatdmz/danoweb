@@ -1,12 +1,30 @@
 @import "./node_modules/firepad/dist/firepad.css";
 
-#firepad {
+#firepad,
+#diff {
+  position: absolute;
   width: 100%;
   height: 100%;
 }
-#firepad-controls {
+#firepad {
+  z-index: 1;
+}
+#diff {
+  display: none;
+  z-index: 3;
+}
+
+#firepad-controls,
+#diff-controls {
   position: absolute;
   left: 0;
   bottom: 0;
   padding: 0 1rem;
+}
+#firepad-controls {
+  z-index: 2;
+}
+#diff-controls {
+  display: none;
+  z-index: 4;
 }

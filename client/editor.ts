@@ -5,7 +5,9 @@ import _dotenv from "dotenv";
 import * as firebase from "firebase/app";
 import "firebase/database";
 
+import { getTextFile } from "./lib/api";
 import { Editor } from "./lib/FirepadEditor";
+import { DiffEditor } from "./lib/DiffEditor";
 
 firebase.initializeApp({
   apiKey: process.env.API_KEY,
@@ -31,10 +33,30 @@ window.onload = async function() {
     console.error("editor failed to initialize", e);
   }
 
+  // prepare the diff editor
+  const diffEditor = new DiffEditor();
+
   // set event handlers
   (document.querySelector(
     "#firepad-controls .save"
-  ) as HTMLButtonElement).onclick = _ev => {
+  ) as HTMLButtonElement).onclick = async _ev => {
+    diffEditor.update({
+      a: await getTextFile(filePath),
+      b: editor.getText()
+    });
+    diffEditor.show();
+  };
+
+  (document.querySelector(
+    "#diff-controls .save"
+  ) as HTMLButtonElement).onclick = async _ev => {
     editor.save();
+    diffEditor.hide();
+  };
+
+  (document.querySelector(
+    "#diff-controls .cancel"
+  ) as HTMLButtonElement).onclick = async _ev => {
+    diffEditor.hide();
   };
 };
