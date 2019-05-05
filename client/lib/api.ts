@@ -30,7 +30,12 @@ export async function putTextFile(
     new Blob([options.content], { type: "text/plain" }),
     fileName
   );
-  const res = await axios.put(getEndpoint(options) + filePath, formData);
+  const res = await axios.put(getEndpoint(options) + filePath, formData, {
+    auth: {
+      username: "denolop",
+      password: "test"
+    }
+  });
   return res.data as string;
 }
 

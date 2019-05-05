@@ -2,6 +2,7 @@ import { sep, Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
 import { serveFile } from "./io.ts";
+import { BasicAuthHandler } from "./auth.ts";
 
 import { APIRequestHandler } from "./handlers/api.ts";
 import { EditorRequestHandler } from "./handlers/editor.ts";
@@ -22,6 +23,7 @@ const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
 const notfoundFile = `${systemDir + sep}notfound.html`;
 const encoder = new TextEncoder();
+const auth = new BasicAuthHandler({ denolop: "test" });
 
 // setup request handlers
 const apiHandler = new APIRequestHandler({
@@ -41,7 +43,8 @@ const systemFileHandler = new SystemFileRequestHandler({
 });
 const userFileHandler = new UserFileRequestHandler({
   encoder,
-  userDir
+  userDir,
+  auth
 });
 
 // main loop
@@ -93,8 +96,8 @@ async function main() {
 async function handleGet(path: string, options: RequestHandlerOptions) {
   let res: Response =
     (await apiHandler.handle(path, options)) ||
-    (await editorHandler.handle(path, options)) ||
     (await systemFileHandler.handle(path, options)) ||
+    (await editorHandler.handle(path, options)) ||
     (await userFileHandler.handle(path, options));
   if (!res) {
     res = await serveFile(notfoundFile);

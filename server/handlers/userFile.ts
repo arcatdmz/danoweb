@@ -9,12 +9,14 @@ import {
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveFile, serveJSON, saveFormFile, StreamReader } from "../io.ts";
+import { AuthHandler } from "../auth.ts";
 
 const { stat } = Deno;
 
 export interface UserFileRequestHandlerOptions {
   encoder: TextEncoder;
   userDir: string;
+  auth: AuthHandler;
 }
 
 /**
@@ -78,8 +80,26 @@ export class UserFileRequestHandler implements RequestHandler {
     path: string,
     options: RequestHandlerOptions
   ): Promise<Response> {
-    const { userDir, encoder } = this.options;
+    const { userDir, encoder, auth: authHandler } = this.options;
     const { req } = options;
+
+    // get authentication header
+    try {
+      const authenticated = authHandler.check(req);
+      if (!authenticated) {
+        throw new Error("authentication failed");
+      }
+    } catch (e) {
+      const res = serveJSON(
+        {
+          success: false,
+          error: e.message
+        },
+        encoder
+      );
+      res.status = Status.Unauthorized;
+      return res;
+    }
 
     // get content-type
     const contentType = req.headers.get("content-type");
