@@ -1,4 +1,4 @@
-import { sep, Response, serve, Status } from "./deps.ts";
+import { config, resolve, sep, Response, serve, Status } from "./deps.ts";
 
 import { parseUrl, RequestHandlerOptions } from "./utils.ts";
 import { serveFile, serveJSON } from "./io.ts";
@@ -9,17 +9,22 @@ import { EditorRequestHandler } from "./handlers/editor.ts";
 import { SystemFileRequestHandler } from "./handlers/systemFile.ts";
 import { UserFileRequestHandler } from "./handlers/userFile.ts";
 
-const { cwd, env } = Deno;
+// load .env and get environment variables
+const dotenv = config({ export: true });
+const { cwd, env: env_ } = Deno;
+const env = env_();
 
 // start the web server
-const address = "127.0.0.1:8000";
+const address = `127.0.0.1:${env.PORT || 8000}`;
 const s = serve(address);
 
 // prepare stuff
-const environment = env()["DENO_ENV"];
+const environment = env.DENO_ENV;
 const debug = environment === "development";
 const systemPath = "/lib";
-const userDir = `${cwd() + sep}public`;
+const userDir =
+  (typeof dotenv.USER_DIR === "string" && resolve(dotenv.USER_DIR)) ||
+  `${cwd() + sep}public`;
 const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
 const notfoundFile = `${systemDir + sep}notfound.html`;
