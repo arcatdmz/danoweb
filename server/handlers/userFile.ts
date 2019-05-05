@@ -3,11 +3,12 @@ import {
   FormFile,
   isFormFile,
   MultipartReader,
-  Response
+  Response,
+  sep
 } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile, StreamReader, Uint8ArrayReader } from "../io.ts";
+import { serveFile, saveFormFile, StreamReader } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -131,27 +132,32 @@ export class UserFileRequestHandler implements RequestHandler {
     const result = await reader.readForm(1 << 30 /* 1MB */);
 
     // get file content
-    let file: FormFile;
-    for (let key in result) {
-      if (isFormFile(result[key])) file = result[key] as FormFile;
-      else {
-        // handle the other parameters
-      }
-    }
-    if (!file) return null;
-    const headers = new Headers();
-    headers.set("content-type", "application/json");
-    return {
-      body: encoder.encode(
-        JSON.stringify({
+    const file = result["content"] as FormFile;
+    let json: any, status: number;
+    if (isFormFile(file)) {
+      try {
+        const filePath = (userDir + path).replace(/\//g, sep);
+        await saveFormFile(file, filePath);
+        json = {
           success: true,
           path,
           filename: file.filename,
           size: file.size,
           type: file.type
-        })
-      ),
-      headers
+        };
+      } catch (e) {
+        json = { success: false, error: "saving file failed", details: e };
+      }
+    } else {
+      json = { success: false, error: "no file submitted" };
+      status = Status.BadRequest;
+    }
+    const headers = new Headers();
+    headers.set("content-type", "application/json");
+    return {
+      body: encoder.encode(JSON.stringify(json)),
+      headers,
+      status
     };
   }
 }

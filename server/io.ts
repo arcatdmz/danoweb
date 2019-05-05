@@ -3,9 +3,17 @@
  *
  * I/O-related utility methods and classes
  */
-import { Response, Status, extname, sep, contentType } from "./deps.ts";
+import {
+  Response,
+  Status,
+  extname,
+  sep,
+  move,
+  contentType,
+  FormFile
+} from "./deps.ts";
 
-const { open, stat } = Deno;
+const { open, stat, writeFile } = Deno;
 
 export async function serveFile(filePath: string): Promise<Response> {
   filePath = filePath.replace(/\//g, sep);
@@ -20,6 +28,14 @@ export async function serveFile(filePath: string): Promise<Response> {
     status: Status.OK,
     headers
   };
+}
+
+export async function saveFormFile(formFile: FormFile, path: string) {
+  if (formFile.tempfile) {
+    return move(formFile.tempfile, path, { overwrite: true });
+  } else {
+    return writeFile(path, formFile.content, { create: true });
+  }
 }
 
 export class Uint8ArrayReader implements Deno.Reader {
