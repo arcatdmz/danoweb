@@ -10,11 +10,10 @@ import { SystemFileRequestHandler } from "./handlers/systemFile.ts";
 import { UserFileRequestHandler } from "./handlers/userFile.ts";
 
 // load .env and get environment variables
-let dotenv: any;
 try {
-  dotenv = config({ export: true });
+  config({ export: true });
 } catch (e) {
-  dotenv = {};
+  // do nothing
 }
 const { cwd, env: env_ } = Deno;
 const env = env_();
@@ -28,13 +27,13 @@ const environment = env.DENO_ENV;
 const debug = environment === "development";
 const systemPath = "/lib";
 const userDir =
-  (typeof dotenv.USER_DIR === "string" && resolve(dotenv.USER_DIR)) ||
+  (typeof env.USER_DIR === "string" && resolve(env.USER_DIR)) ||
   `${cwd() + sep}public`;
 const systemDir = `${cwd() + sep}lib`;
 const editorFile = `${systemDir + sep}editor.html`;
 const notfoundFile = `${systemDir + sep}notfound.html`;
 const encoder = new TextEncoder();
-const auth = new BasicAuthHandler({ danoweb: "test" });
+const auth = new BasicAuthHandler({ danoweb: env.USER_PASSWORD || "test" });
 
 // setup request handlers
 const apiHandler = new APIRequestHandler({
