@@ -30,7 +30,8 @@ const apiHandler = new APIRequestHandler({
   encoder,
   address,
   environment,
-  debug
+  debug,
+  auth
 });
 const editorHandler = new EditorRequestHandler({
   encoder,

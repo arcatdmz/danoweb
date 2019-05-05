@@ -1,13 +1,15 @@
-import { Response, extname, contentType } from "../deps.ts";
+import { Status, Response, extname, contentType } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveJSON } from "../io.ts";
+import { AuthHandler } from "../auth.ts";
 
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
   address: string;
   environment: string;
   debug: boolean;
+  auth: AuthHandler;
 }
 
 /**
@@ -24,18 +26,39 @@ export class APIRequestHandler implements RequestHandler {
     if (path.indexOf("/api/") !== 0) return null;
     path = path.substr("/api".length);
 
-    const response: Response = this.server(path, options);
-    if (!response) return null;
-
-    const headers = new Headers();
-    headers.set("content-type", contentType(extname(path)));
-    response.headers = headers;
-    return response;
+    return this.server(path, options) || this.auth(path, options);
   }
 
   server(path: string, _options: RequestHandlerOptions) {
     if (path !== "/server") return null;
     const { encoder, address, debug } = this.options;
     return serveJSON({ address, debug }, encoder);
+  }
+
+  auth(path: string, options: RequestHandlerOptions) {
+    if (path !== "/auth") return null;
+    const { encoder, auth } = this.options;
+    const { req } = options;
+    try {
+      if (!auth.check(req)) {
+        throw new Error("authentication failed");
+      }
+    } catch (e) {
+      const res = serveJSON(
+        {
+          success: false,
+          error: e.message
+        },
+        encoder
+      );
+      res.status = Status.Unauthorized;
+      return res;
+    }
+    return serveJSON(
+      {
+        success: true
+      },
+      encoder
+    );
   }
 }

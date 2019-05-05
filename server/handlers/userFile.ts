@@ -80,13 +80,12 @@ export class UserFileRequestHandler implements RequestHandler {
     path: string,
     options: RequestHandlerOptions
   ): Promise<Response> {
-    const { userDir, encoder, auth: authHandler } = this.options;
+    const { userDir, encoder, auth } = this.options;
     const { req } = options;
 
     // get authentication header
     try {
-      const authenticated = authHandler.check(req);
-      if (!authenticated) {
+      if (!auth.check(req)) {
         throw new Error("authentication failed");
       }
     } catch (e) {
