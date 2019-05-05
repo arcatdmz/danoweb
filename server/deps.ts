@@ -11,7 +11,7 @@ import {
 import {
   MultipartWriter,
   MultipartReader
-} from "https://deno.land/std/multipart/multipart.ts";
+} from "https://denopkg.com/arcatdmz/deno_std/multipart/multipart.ts";
 
 import { extname, sep } from "https://deno.land/std/fs/path.ts";
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
