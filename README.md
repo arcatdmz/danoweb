@@ -4,14 +4,29 @@
 
 ## docker build and run
 
-1. see "environment variables" section and put `.env` files accordingly
-2. docker build and run
+1. git clone
+2. see "environment variables" section and put `.env` files accordingly
+3. docker build and run
 
 ```sh
 docker build . -t danoweb
 docker build . --file Dockerfile.local -t danoweb:local
 docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
 ```
+
+## deploy to Heroku
+
+1. make sure the application runs successfully in your local environment
+2. commit `.env` file or define `build:config:` entries in `heroku.yml` and commit it
+3. create a project in heroku and `git push`
+
+```sh
+heroku create <your app name>
+heroku stack:set container
+git push heroku master
+```
+
+4. see it in action!
 
 ## build
 
