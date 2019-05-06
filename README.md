@@ -5,7 +5,7 @@
 ## docker build and run
 
 1. git clone
-2. see "environment variables" section and put `.env` files accordingly
+2. see "environment variables" section and put the `.env` file accordingly
 3. docker build and run
 
 ```sh

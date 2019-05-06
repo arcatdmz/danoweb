@@ -1,6 +1,7 @@
 .git
-**/.vscode
-client/.cache
-client/node_modules
-server/lib
+client
+server/.vscode
 server/node_modules
+server/package.json
+server/yarn.lock
+server/tsconfig.json
