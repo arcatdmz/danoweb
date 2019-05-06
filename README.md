@@ -27,10 +27,13 @@ demo site: https://danoweb.herokuapp.com/
 
 ### plans
 
+- HEAD request handlers (currently returning 501 Not Implemented)
+- file view (treeview of serving/edited files)
 - export files (currently, files are restored at every Heroku deploy)
 - delete and move files (currently, files can only be created or edited)
 - handle non-text files (currently, only text files are supported)
 - Wiki-like links in the editor (currently, the code editor renders the code as-is, but there is much space for [PX](http://sigpx.org) improvements)
+- better collaborative editing experience (e.g., asking the user to login using GitHub etc. to show collaborators)
 
 ## deploy
 
