@@ -31,7 +31,7 @@ git push heroku master
 ## build
 
 1. install `deno` (tested with `v0.3.10`)
-2. build client-side code (requires `yarn`)
+2. build client-side code (requires `yarn`) -- this can be skipped since the built files are included in the repo
 
 ```sh
 cd client/
@@ -41,7 +41,7 @@ yarn build
 
 ## start
 
-start the server with `deno`
+start the server with `deno` (use `deno run` subcommand for `deno` v0.4.0 and later)
 
 ```sh
 cd server/
@@ -57,7 +57,7 @@ yarn start
 
 ## environment variables
 
-- before starting the server, put `.env` file in `./client/` -- these values can be retrieved from the [firebase](https://firebase.google.com/docs/database/) website
+- before starting the server, put `.env` file in `./server/` -- all the values except for `USER_PASSWORD` are related to [firebase](https://firebase.google.com/docs/database/) cand can be retrieved from the website
 
 ```sh
 API_KEY={YOUR_FIREBASE_API_KEY}
@@ -68,9 +68,10 @@ STORAGE_BUCKET={YOUR_FIREBASE_STORAGE_BUCKET}
 MESSAGING_SENDER_ID={YOUR_MESSAGING_SENDER_ID}
 APP_ID={YOUR_APP_ID}
 DATABASE_PREFIX={PATH_PREFIX_FOR_YOUR_DATABASE(optional)}
+USER_PASSWORD={PASSWORD_FOR_AUTHENTICATION}
 ```
 
-- optionally put `.env` file in `./server/` -- default values are shown below
+- optionally provide the following environment variables
 - do NOT put this file when the application runs in a Docker container
 
 ```sh
