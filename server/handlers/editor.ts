@@ -1,7 +1,7 @@
 import { Response, Status } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile } from "../io.ts";
+import { serveFile, redirect } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -28,14 +28,12 @@ export class EditorRequestHandler implements RequestHandler {
     try {
       const fileInfo = await stat(filePath);
       if (fileInfo.isDirectory()) {
-        return {
-          body: encoder.encode("Directory listing prohibited\n"),
-          status: Status.Forbidden
-        };
+        path = path.charAt(path.length - 1) === "/" ? path : `${path}/`;
+        return redirect(`${path}index.html?mode=edit`, encoder);
       }
+      return serveFile(editorPath);
     } catch (e) {
       // file not found
-    } finally {
       return serveFile(editorPath);
     }
   }

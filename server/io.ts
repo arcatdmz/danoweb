@@ -42,6 +42,21 @@ export function serveJSON(json: any, encoder: TextEncoder): Response {
   };
 }
 
+export function redirect(redirect: string, encoder: TextEncoder) {
+  const res = serveJSON(
+    {
+      success: true,
+      redirect
+    },
+    encoder
+  );
+  const headers = new Headers();
+  headers.set("location", redirect);
+  res.headers = headers;
+  res.status = Status.PermanentRedirect;
+  return res;
+}
+
 export async function saveFormFile(formFile: FormFile, path: string) {
   // ensure that the parent directory exists
   const { dirname } = sep === "\\" ? win32 : posix;

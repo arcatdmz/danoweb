@@ -8,7 +8,13 @@ import {
 } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile, serveJSON, saveFormFile, StreamReader } from "../io.ts";
+import {
+  serveFile,
+  serveJSON,
+  redirect,
+  saveFormFile,
+  StreamReader
+} from "../io.ts";
 import { AuthHandler } from "../auth.ts";
 
 const { stat } = Deno;
@@ -58,9 +64,11 @@ export class UserFileRequestHandler implements RequestHandler {
 
       // path points to a directory
       if (fileInfo.isDirectory()) {
-        const res = serveJSON({ success: true, type: "directory" }, encoder);
-        if (check) res.status = Status.Forbidden;
-        return res;
+        if (check) {
+          return serveJSON({ success: true, type: "directory" }, encoder);
+        }
+        path = path.charAt(path.length - 1) === "/" ? path : `${path}/`;
+        return redirect(`${path}index.html`, encoder);
       }
 
       // path points to a file
