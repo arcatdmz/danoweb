@@ -6,6 +6,9 @@
 
 demo site: https://danoweb.herokuapp.com/
 
+1. anyone can (collaboratively) edit any served text files by appending `?mode=edit` query parameter -- どのページも URL 末尾に `?mode=edit` をつけると編集できます
+2. those who know the authentication token (`USER_PASSWORD`) can save the edits to update the served files (ask [me](https://twitter.com/arcatdmz) if interested) -- 編集結果をファイルに書き戻すには `USER_PASSWORD` が必要です
+
 ### concept
 
 - what you see is what you can (collaboratively) edit
@@ -15,17 +18,19 @@ demo site: https://danoweb.herokuapp.com/
   - [Deno](https://deno.land/) allows to load TypeScript files on the web
   - many put files on GitHub and load them through [denopkg.com](https://github.com/denopkg/denopkg.com)
   - dano focuses on a more direct and casual way of sharing/editing code
-  - e.g., `deno https://danoweb.herokuapp.com/index.ts`
-
-### permissions
-
-1. anyone can (collaboratively) edit the source code by appending `?mode=edit` query parameter
-2. those with the authentication token (`USER_PASSWORD`) can save the edits
+  - e.g., `deno https://danoweb.herokuapp.com/index.ts` -- the code can be edited at https://danoweb.herokuapp.com/index.ts?mode=edit
 
 ### backend
 
 1. for collaborative editing, [Firebase Realtime Database](https://firebase.google.com/docs/database/) is used
 2. for serving files and saving the edits, native file system is used
+
+### plans
+
+- export files (currently, files are restored at every Heroku deploy)
+- delete and move files (currently, files can only be created or edited)
+- handle non-text files (currently, only text files are supported)
+- Wiki-like links in the editor (currently, the code editor renders the code as-is, but there is much space for [PX](http://sigpx.org) improvements)
 
 ## deploy
 
