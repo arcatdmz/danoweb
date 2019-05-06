@@ -1,24 +1,9 @@
 /// <reference path="node_modules/typescript/lib/lib.dom.d.ts" />
 
-import _dotenv from "dotenv";
-
-import * as firebase from "firebase/app";
-import "firebase/database";
-
-import { getTextFile, isAuthenticated, authenticate } from "./lib/api";
+import { getEnv, getTextFile, isAuthenticated, authenticate } from "./lib/api";
 import { Modal, Loader } from "./lib/utils";
 import { Editor } from "./lib/FirepadEditor";
 import { DiffEditor } from "./lib/DiffEditor";
-
-firebase.initializeApp({
-  apiKey: process.env.API_KEY,
-  authDomain: process.env.AUTH_DOMAIN,
-  databaseURL: process.env.DATABASE_URL,
-  projectId: process.env.PROJECT_ID,
-  storageBucket: process.env.STORAGE_BUCKET,
-  messagingSenderId: process.env.MESSAGING_SENDER_ID,
-  appId: process.env.APP_ID
-});
 
 window.onload = async function() {
   // set window title
@@ -26,7 +11,8 @@ window.onload = async function() {
   document.title = `${filePath} | danoweb`;
 
   // show the editor
-  const editor = new Editor({ filePath });
+  const env = await getEnv();
+  const editor = new Editor({ filePath, env });
   try {
     await editor.initialize();
     console.log("editor initialized successfully");

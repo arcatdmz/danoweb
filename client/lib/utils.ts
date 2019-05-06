@@ -1,3 +1,15 @@
+export function setupFirebase(firebase: any, env: { [key: string]: string }) {
+  firebase.initializeApp({
+    apiKey: env.API_KEY,
+    authDomain: env.AUTH_DOMAIN,
+    databaseURL: env.DATABASE_URL,
+    projectId: env.PROJECT_ID,
+    storageBucket: env.STORAGE_BUCKET,
+    messagingSenderId: env.MESSAGING_SENDER_ID,
+    appId: env.APP_ID
+  });
+}
+
 export function setupMonaco() {
   window["MonacoEnvironment"] = {
     getWorkerUrl: function(_moduleId, label) {

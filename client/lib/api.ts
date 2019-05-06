@@ -10,6 +10,20 @@ export interface APIOptions {
   endpoint?: string;
 }
 
+export async function getEnv(
+  options?: APIOptions
+): Promise<{ [key: string]: string }> {
+  try {
+    const res = await axios.get(getEndpoint(options) + "/lib/api/info");
+    if (res.data && res.status === 200) {
+      return res.data.env;
+    }
+  } catch (e) {
+    // do nothing.
+  }
+  return {};
+}
+
 export async function authenticate(token: string, options?: APIOptions) {
   try {
     const res = await axios.post(getEndpoint(options) + "/lib/api/auth", null, {

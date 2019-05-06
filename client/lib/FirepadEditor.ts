@@ -19,13 +19,12 @@ import "firebase/database";
 
 import Firepad from "firepad";
 
-import _dotenv from "dotenv";
-
 import { getTextFile, putTextFile } from "./api";
-import { setupMonaco, getMonacoLanguage } from "./utils";
+import { setupFirebase, setupMonaco, getMonacoLanguage } from "./utils";
 
 export interface EditorOptions {
   filePath?: string;
+  env?: { [key: string]: string };
 }
 
 export class Editor {
@@ -37,6 +36,7 @@ export class Editor {
     this.options = options || {};
   }
   async initialize() {
+    setupFirebase(firebase, this.options.env);
     setupMonaco();
     this.editor = monaco.editor.create(document.getElementById("firepad"), {
       language: getMonacoLanguage(this.options.filePath),
@@ -46,7 +46,7 @@ export class Editor {
     const defaultText = await getTextFile(this.options.filePath);
     const firepadRef = firebase
       .database()
-      .ref(`files/${Editor.getFirebasePath(this.options.filePath)}`);
+      .ref(`files/${this.getFirebasePath(this.options.filePath)}`);
     this.firepad = Firepad.fromMonaco(firepadRef, this.editor, {
       defaultText
     });
@@ -63,9 +63,9 @@ export class Editor {
     return this.firepad.getText() as string;
   }
 
-  static getFirebasePath(filePath: string) {
+  getFirebasePath(filePath: string) {
     return (
-      (process.env.DATABASE_PREFIX || "") +
+      ((this.options.env && this.options.env.DATABASE_PREFIX) || "") +
       encodeURIComponent(filePath).replace(/\./g, "%2E")
     );
   }
