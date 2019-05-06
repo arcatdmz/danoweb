@@ -2,58 +2,64 @@
 
 **d**istributed **a**uthoring environment built with de**no** for the **web**
 
-## docker build and run
+## how to use
+
+demo site: https://danoweb.herokuapp.com/
+
+### concept
+
+- what you see is what you can (collaboratively) edit
+  - like a [WebDAV](https://wikipedia.org/wiki/WebDAV) server but with a code editor that appears with `?mode=edit` query parameter
+  - like a [Wiki](http://wiki.c2.com/?WikiWikiWeb) site but with focus on serving raw files
+- built with Deno for Deno
+  - [Deno](https://deno.land/) allows to load TypeScript files on the web
+  - many put files on GitHub and load them through [denopkg.com](https://github.com/denopkg/denopkg.com)
+  - dano focuses on a more direct and casual way of sharing/editing code
+  - e.g., `deno https://danoweb.herokuapp.com/index.ts`
+
+### permissions
+
+1. anyone can (collaboratively) edit the source code by appending `?mode=edit` query parameter
+2. those with the authentication token (`USER_PASSWORD`) can save the edits
+
+### backend
+
+1. for collaborative editing, [Firebase Realtime Database](https://firebase.google.com/docs/database/) is used
+2. for serving files and saving the edits, native file system is used
+
+## deploy
+
+### A. deploy to Heroku
 
 1. git clone
 2. see "environment variables" section and put the `.env` file accordingly
-3. docker build and run
+3. create a Heroku project
+4. run [`heroku config:push`](https://github.com/xavdid/heroku-config) to save `.env` content as config vars
+5. `git push` to make the project public
 
 ```sh
-docker build . -t danoweb
-docker build . --file Dockerfile.local -t danoweb:local
-docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
-```
-
-## deploy to Heroku
-
-1. make sure the application runs successfully in your local environment
-2. commit `.env` file or use `heroku config:push` command of [heroku-config plugin](https://github.com/xavdid/heroku-config) to save `.env` content as config vars
-3. create a project in heroku and `git push`
-
-```sh
+git clone https://github.com/arcatdmz/danoweb.git
+cd danoweb
+vi ./server/.env
 heroku create <your app name>
 heroku stack:set container
 heroku config:push -f ./server/.env
 git push heroku master
 ```
 
-4. see it in action!
+### B. docker build and run
 
-## build
-
-1. install `deno` (tested with `v0.3.10`)
-2. build client-side code (requires `yarn`) -- this can be skipped since the built files are included in the repo
-
-```sh
-cd client/
-yarn install
-yarn build
-```
-
-## start
-
-start the server with `deno` (use `deno run` subcommand for `deno` v0.4.0 and later)
+1. git clone
+2. see "environment variables" section and put the `.env` file accordingly
+3. docker build and run
 
 ```sh
-cd server/
-deno --allow-env --allow-net --allow-read --allow-write server.ts
-```
-
-or `yarn`
-
-```sh
-cd server/
-yarn start
+git clone https://github.com/arcatdmz/danoweb.git
+cd danoweb
+vi ./server/.env
+docker build . -t danoweb
+docker build . --file Dockerfile.local -t danoweb:local
+docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
 ```
 
 ## environment variables
@@ -79,6 +85,35 @@ USER_PASSWORD={PASSWORD_FOR_AUTHENTICATION}
 USER_DIR=./public
 HOST=127.0.0.1
 PORT=8000
+```
+
+## develop
+
+### build
+
+1. install `deno` (tested with `v0.3.10`)
+2. build client-side code (requires `yarn`) -- this can be skipped since the built files are included in the repo
+
+```sh
+cd client/
+yarn install
+yarn build
+```
+
+### start
+
+start the server with `deno` (use `deno run` subcommand for `deno` v0.4.0 and later)
+
+```sh
+cd server/
+deno --allow-env --allow-net --allow-read --allow-write server.ts
+```
+
+or `yarn`
+
+```sh
+cd server/
+yarn start
 ```
 
 ---
