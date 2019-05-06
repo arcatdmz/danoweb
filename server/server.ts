@@ -1,6 +1,6 @@
-import { config, resolve, sep, Response, serve, Status } from "./deps.ts";
+import { resolve, sep, Response, serve, Status } from "./deps.ts";
 
-import { parseUrl, RequestHandlerOptions } from "./utils.ts";
+import { getEnv, parseUrl, RequestHandlerOptions } from "./utils.ts";
 import { serveFile, serveJSON } from "./io.ts";
 import { BasicAuthHandler } from "./auth.ts";
 
@@ -9,22 +9,27 @@ import { EditorRequestHandler } from "./handlers/editor.ts";
 import { SystemFileRequestHandler } from "./handlers/systemFile.ts";
 import { UserFileRequestHandler } from "./handlers/userFile.ts";
 
-// load .env and get environment variables
-try {
-  config({ export: true });
-} catch (e) {
-  // do nothing
-}
-const { cwd, env: env_ } = Deno;
-const env = env_();
+const { cwd } = Deno;
+
+// get environment variables
+const { env, clientEnv } = getEnv([
+  "DENO_ENV",
+  "API_KEY",
+  "AUTH_DOMAIN",
+  "DATABASE_URL",
+  "PROJECT_ID",
+  "STORAGE_BUCKET",
+  "MESSAGING_SENDER_ID",
+  "APP_ID",
+  "DATABASE_PREFIX"
+]);
 
 // start the web server
 const address = `${env.HOST || "127.0.0.1"}:${env.PORT || 8000}`;
 const s = serve(address);
 
 // prepare stuff
-const environment = env.DENO_ENV;
-const debug = environment === "development";
+const debug = env.DENO_ENV === "development";
 const systemPath = "/lib";
 const userDir =
   (typeof env.USER_DIR === "string" && resolve(env.USER_DIR)) ||
@@ -39,7 +44,7 @@ const auth = new BasicAuthHandler({ danoweb: env.USER_PASSWORD || "test" });
 const apiHandler = new APIRequestHandler({
   encoder,
   address,
-  environment,
+  env: clientEnv,
   debug,
   auth,
   systemPath

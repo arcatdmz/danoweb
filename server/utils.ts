@@ -3,7 +3,29 @@
  *
  * Utility methods and types
  */
-import { ServerRequest, Response } from "./deps.ts";
+import { config, ServerRequest, Response } from "./deps.ts";
+
+/**
+ * Get environment variables
+ * @param clientVars variable names to be passed to the browser
+ */
+export function getEnv(clientVars: string[]) {
+  // load .env and get environment variables
+  try {
+    config({ export: true });
+  } catch (e) {
+    // do nothing
+  }
+  const { env: env_ } = Deno;
+  const env = env_();
+  const clientEnv = Object.keys(env)
+    .filter(key => clientVars.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = env[key];
+      return obj;
+    }, {});
+  return { env, clientEnv };
+}
 
 /**
  * Parse request url to return request path and query parameters

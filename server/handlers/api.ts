@@ -7,7 +7,7 @@ import { AuthHandler } from "../auth.ts";
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
   address: string;
-  environment: string;
+  env: { [index: string]: string };
   debug: boolean;
   auth: AuthHandler;
   systemPath: string;
@@ -28,13 +28,13 @@ export class APIRequestHandler implements RequestHandler {
     if (path.indexOf(`${pathPrefix}/`) !== 0) return null;
     path = path.substr(pathPrefix.length);
 
-    return this.server(path, options) || this.auth(path, options);
+    return this.info(path, options) || this.auth(path, options);
   }
 
-  server(path: string, _options: RequestHandlerOptions) {
-    if (path !== "/server") return null;
-    const { encoder, address, debug } = this.options;
-    return serveJSON({ address, debug }, encoder);
+  info(path: string, _options: RequestHandlerOptions) {
+    if (path !== "/info") return null;
+    const { encoder, address, debug, env } = this.options;
+    return serveJSON({ address, debug, env }, encoder);
   }
 
   auth(path: string, options: RequestHandlerOptions) {
