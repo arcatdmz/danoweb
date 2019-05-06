@@ -143,7 +143,7 @@ export class UserFileRequestHandler implements RequestHandler {
     // console.log("</req-body>");
 
     // get file content
-    const result = await reader.readForm(1 << 30 /* 1MB */);
+    const result = await reader.readForm(4096);
     const file = result["content"] as FormFile;
     let json: any, status: number;
     if (isFormFile(file)) {
