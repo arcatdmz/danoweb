@@ -17,12 +17,13 @@ docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:l
 ## deploy to Heroku
 
 1. make sure the application runs successfully in your local environment
-2. commit `.env` file or define `build:config:` entries in `heroku.yml` and commit it
+2. commit `.env` file or use `heroku config:push` command of [heroku-config plugin](https://github.com/xavdid/heroku-config) to save `.env` content as config vars
 3. create a project in heroku and `git push`
 
 ```sh
 heroku create <your app name>
 heroku stack:set container
+heroku config:push -f ./server/.env
 git push heroku master
 ```
 
