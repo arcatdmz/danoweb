@@ -2785,9 +2785,7 @@ var MonacoAdapter = function () {
    */
   function MonacoAdapter(monacoInstance) {
     /** House Keeping */
-    if (monacoInstance !== null && typeof global !== 'undefined' && global.monaco
-      && !monacoInstance instanceof global.monaco) {
-
+    if (!monacoInstance) {
       throw new Error('MonacoAdapter: Incorrect Parameter Recieved in constructor, '
         + 'expected valid Monaco Instance');
     }
@@ -5897,7 +5895,7 @@ firepad.Firepad = (function(global) {
       if (curValue !== '') {
         throw new Error("Can't initialize Firepad with an ACE instance that already contains text.");
       }
-    } else if (global.monaco && place && place instanceof global.monaco.constructor) {
+    } else if (global.monaco && place) {
       monaco = global.monaco;
       this.monaco_ = this.editor_ = place;
       curValue = this.monaco_.getValue();
