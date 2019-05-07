@@ -4,7 +4,7 @@
 
 ## how to use
 
-demo site: https://danoweb.herokuapp.com/
+demo site: https://danoweb.site/
 
 1. anyone can (collaboratively) edit any served text files by appending `?mode=edit` query parameter -- どのページも URL 末尾に `?mode=edit` をつけると編集できます
 2. those who know the authentication token (`USER_PASSWORD`) can save the edits to update the served files (ask [me](https://twitter.com/arcatdmz) if interested) -- 編集結果をファイルに書き戻すには `USER_PASSWORD` が必要です
@@ -18,7 +18,7 @@ demo site: https://danoweb.herokuapp.com/
   - [Deno](https://deno.land/) allows to load TypeScript files on the web
   - many put files on GitHub and load them through [denopkg.com](https://github.com/denopkg/denopkg.com)
   - dano focuses on a more direct and casual way of sharing/editing code
-  - e.g., `deno https://danoweb.herokuapp.com/index.ts` -- the code can be edited at https://danoweb.herokuapp.com/index.ts?mode=edit
+  - e.g., `deno https://danoweb.site/index.ts` -- the code can be edited at https://danoweb.site/index.ts?mode=edit
 
 ### backend
 
@@ -34,6 +34,7 @@ demo site: https://danoweb.herokuapp.com/
 - handle non-text files (currently, only text files are supported)
 - Wiki-like links in the editor (currently, the code editor renders the code as-is, but there is much space for [PX](http://sigpx.org) improvements)
 - better collaborative editing experience (e.g., asking the user to login using GitHub etc. to show collaborators)
+- TypeScript auto completion for all the Deno code on the web!
 
 ## deploy
 
@@ -87,7 +88,7 @@ USER_PASSWORD={PASSWORD_FOR_AUTHENTICATION}
 ```
 
 - optionally provide the following environment variables
-- do NOT put this file when the application runs in a Docker container
+- do NOT define these variables when the application runs in a Docker container (especially Heroku that provides a unique `PORT` for every deploy)
 
 ```sh
 USER_DIR=./public
