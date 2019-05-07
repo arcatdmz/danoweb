@@ -13,7 +13,7 @@ import {
 import {
   MultipartWriter,
   MultipartReader
-} from "https://denopkg.com/arcatdmz/deno_std/multipart/multipart.ts";
+} from "https://deno.land/std/multipart/multipart.ts";
 
 import { ensureDir, move } from "https://deno.land/std/fs/mod.ts";
 import {
