@@ -15,7 +15,7 @@
   "dependencies": {
     "@types/dotenv": "^6.1.1",
     "axios": "^0.18.0",
-    "firebase": "^5.11.0",
+    "firebase": "5.5.5",
     "firepad": "^1.5.3",
     "js-cookie": "^2.2.0",
     "milligram": "^1.3.0",
