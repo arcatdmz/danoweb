@@ -10,6 +10,14 @@
  * Firepad with Monaco editor:
  * https://github.com/FirebaseExtended/firepad/blob/master/examples/monaco.html
  */
+
+/**
+ * Rewritten Monaco Adapter
+ * https://github.com/FirebaseExtended/firepad/pull/325
+ * with a slight modification
+ * https://github.com/arcatdmz/firepad/commit/7152e606dd466a65c359a8b0fcc56c0037cc696b
+ */
+
 import * as monaco__ from "monaco-editor";
 import * as monaco_ from "monaco-editor/esm/vs/editor/editor.main.js";
 const monaco = monaco_ as typeof monaco__;
@@ -17,7 +25,7 @@ const monaco = monaco_ as typeof monaco__;
 import * as firebase from "firebase/app";
 import "firebase/database";
 
-import Firepad from "firepad";
+import Firepad from "../firepad/firepad.js";
 
 import { getTextFile, putTextFile } from "./api";
 import { setupFirebase, setupMonaco, getMonacoLanguage } from "./utils";
@@ -41,7 +49,7 @@ export class Editor {
     this.editor = monaco.editor.create(document.getElementById("firepad"), {
       language: getMonacoLanguage(this.options.filePath),
       automaticLayout: true
-    });
+    }) as any;
 
     const defaultText = await getTextFile(this.options.filePath);
     const firepadRef = firebase
