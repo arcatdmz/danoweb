@@ -50,11 +50,13 @@ export class Editor {
       language: getMonacoLanguage(this.options.filePath),
       automaticLayout: true
     }) as any;
+    this.editor.getModel().setEOL(monaco.editor.EndOfLineSequence.LF);
 
-    const defaultText = await getTextFile(this.options.filePath);
     const firepadRef = firebase
       .database()
       .ref(`files/${this.getFirebasePath(this.options.filePath)}`);
+    let defaultText = await getTextFile(this.options.filePath);
+    if (defaultText) defaultText = defaultText.replace(/(?:\r\n|\r|\n)/g, "\n");
     this.firepad = Firepad.fromMonaco(firepadRef, this.editor, {
       defaultText
     });

@@ -49,8 +49,10 @@ window.onload = async function() {
     "#firepad-controls .save"
   ) as HTMLButtonElement).onclick = async _ev => {
     await loader.start("loading");
+    let original = await getTextFile(filePath);
+    if (original) original = original.replace(/(?:\r\n|\r|\n)/g, "\n");
     diffEditor.update({
-      a: await getTextFile(filePath),
+      a: original,
       b: editor.getText()
     });
     diffEditor.show();
