@@ -27,11 +27,7 @@ demo site: https://danoweb.site/
 
 ### plans
 
-- HEAD request handlers (currently returning 501 Not Implemented)
-- file view (treeview of serving/edited files)
-- export files (currently, files are restored at every Heroku deploy)
-- delete and move files (currently, files can only be created or edited)
-- handle non-text files (currently, only text files are supported)
+- see [GitHub issues](https://github.com/arcatdmz/danoweb/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) for short-term goals
 - Wiki-like links in the editor (currently, the code editor renders the code as-is, but there is much space for [PX](http://sigpx.org) improvements)
 - better collaborative editing experience (e.g., asking the user to login using GitHub etc. to show collaborators)
 - TypeScript auto completion for all the Deno code on the web!
