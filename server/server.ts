@@ -83,6 +83,9 @@ async function main() {
     // handle the request
     let res: Response;
     switch (method) {
+      case "head":
+        res = await handleHead(path, options);
+        break;
       case "get":
         res = await handleGet(path, options);
         break;
@@ -115,6 +118,22 @@ async function main() {
       })
     );
   }
+}
+
+async function handleHead(path: string, options: RequestHandlerOptions) {
+  let res: Response =
+    (await systemFileHandler.handle(path, options)) ||
+    (await userFileHandler.handle(path, options));
+  if (!res) {
+    res = serveJSON(
+      {
+        error: "not implemented\n"
+      },
+      encoder
+    );
+    res.status = Status.NotImplemented;
+  }
+  return res;
 }
 
 async function handleGet(path: string, options: RequestHandlerOptions) {

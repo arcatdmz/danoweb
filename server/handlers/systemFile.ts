@@ -1,7 +1,7 @@
 import { Status } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveFile, serveJSON } from "../io.ts";
+import { serveHead, serveFile, serveJSON } from "../io.ts";
 
 const { stat } = Deno;
 
@@ -22,7 +22,7 @@ export class SystemFileRequestHandler implements RequestHandler {
   }
 
   async handle(path: string, options: RequestHandlerOptions) {
-    const { encoder, systemDir, systemPath } = this.options;
+    const { systemDir, systemPath } = this.options;
     if (path === systemPath || path.indexOf(`${systemPath}/`) !== 0)
       return null;
     const filePath = systemDir + path.substr(systemPath.length);
@@ -34,16 +34,27 @@ export class SystemFileRequestHandler implements RequestHandler {
           options
         );
       }
-      return serveFile(filePath);
+      if (options.method === "head") {
+        return serveHead(filePath, fileInfo);
+      }
+      return serveFile(filePath, fileInfo);
     } catch (e) {
-      const res = serveJSON(
-        {
-          error: "system file not found; system file cannot be modified"
-        },
-        encoder
-      );
-      res.status = Status.Forbidden;
-      return res;
+      return this.handleError(options);
     }
+  }
+
+  private handleError(options: RequestHandlerOptions) {
+    if (options.method === "head") {
+      return serveHead();
+    }
+    const { encoder } = this.options;
+    const res = serveJSON(
+      {
+        error: "system file not found"
+      },
+      encoder
+    );
+    res.status = Status.Forbidden;
+    return res;
   }
 }

@@ -18,11 +18,28 @@ import {
 
 const { open, stat, writeFile } = Deno;
 
-export async function serveFile(filePath: string): Promise<Response> {
+export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo) {
+  const headers = new Headers();
+  if (filePath && fileInfo) {
+    const mediaType = contentType(extname(filePath));
+    headers.set("content-length", fileInfo.len.toString());
+    headers.set("content-type", mediaType);
+  }
+  return {
+    body: null,
+    status: fileInfo ? Status.OK : Status.NotFound,
+    headers
+  };
+}
+
+export async function serveFile(
+  filePath: string,
+  fileInfo?: Deno.FileInfo
+): Promise<Response> {
   filePath = filePath.replace(/\//g, sep);
   const mediaType = contentType(extname(filePath)) || "text/plain";
   const file = await open(filePath);
-  const fileInfo = await stat(filePath);
+  if (!fileInfo) fileInfo = await stat(filePath);
   const headers = new Headers();
   headers.set("content-length", fileInfo.len.toString());
   headers.set("content-type", mediaType);
@@ -34,10 +51,21 @@ export async function serveFile(filePath: string): Promise<Response> {
 }
 
 export function serveJSON(json: any, encoder: TextEncoder): Response {
+  const body = encoder.encode(JSON.stringify(json));
   const headers = new Headers();
+  headers.set("content-length", body.byteLength.toString());
   headers.set("content-type", "application/json");
   return {
-    body: encoder.encode(JSON.stringify(json)),
+    body,
+    headers
+  };
+}
+
+export function serveHeadOfResponse(res: Response) {
+  const { status, headers } = res;
+  return {
+    body: null,
+    status,
     headers
   };
 }

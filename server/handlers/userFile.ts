@@ -9,8 +9,10 @@ import {
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import {
+  serveHead,
   serveFile,
   serveJSON,
+  serveHeadOfResponse,
   redirect,
   saveFormFile,
   StreamReader
@@ -38,6 +40,7 @@ export class UserFileRequestHandler implements RequestHandler {
   async handle(path: string, options: RequestHandlerOptions) {
     switch (options.method) {
       case "get":
+      case "head":
         return this.handleGet(path, options);
       case "put":
         return this.handlePut(path, options);
@@ -73,14 +76,18 @@ export class UserFileRequestHandler implements RequestHandler {
 
       // path points to a file
       if (check) {
-        return serveJSON({ success: true, type: "file" }, encoder);
+        const res = serveJSON({ success: true, type: "file" }, encoder);
+        if (options.method === "head") {
+          return serveHeadOfResponse(res);
+        }
+        return res;
       }
-      return await serveFile(filePath);
+      if (options.method === "head") {
+        return serveHead(filePath, fileInfo);
+      }
+      return await serveFile(filePath, fileInfo);
     } catch (e) {
-      if (check) {
-        return serveJSON({ success: false }, encoder);
-      }
-      return null;
+      return this.handleError(check, options);
     }
   }
 
@@ -170,5 +177,16 @@ export class UserFileRequestHandler implements RequestHandler {
     const res = serveJSON(json, encoder);
     res.status = status;
     return res;
+  }
+
+  private handleError(check: boolean, options: RequestHandlerOptions) {
+    if (options.method === "head") {
+      return serveHead();
+    }
+    if (check) {
+      const { encoder } = this.options;
+      return serveJSON({ success: false }, encoder);
+    }
+    return null;
   }
 }
