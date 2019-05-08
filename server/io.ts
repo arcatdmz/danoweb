@@ -19,6 +19,7 @@ import {
 const { open, stat, writeFile } = Deno;
 
 export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo) {
+  filePath = filePath.replace(/\//g, sep);
   const headers = new Headers();
   if (filePath && fileInfo) {
     const mediaType = contentType(extname(filePath));
