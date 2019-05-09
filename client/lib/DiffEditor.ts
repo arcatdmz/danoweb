@@ -38,7 +38,7 @@ export class DiffEditor {
     setupMonaco();
     this.editor = monaco.editor.createDiffEditor(wrapper, {
       automaticLayout: true
-    });
+    }) as any;
 
     // fill the content
     if (this.options) {
