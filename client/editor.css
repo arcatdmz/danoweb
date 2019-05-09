@@ -1,5 +1,9 @@
 @import "./firepad/firepad.css";
 
+body {
+  overflow: hidden;
+}
+
 #firepad,
 #diff {
   position: absolute;
