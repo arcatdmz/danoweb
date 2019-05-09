@@ -220,8 +220,13 @@ export class Tar {
   async append(fileName: string, opts: TarOptions) {
     opts = opts || {};
 
-    let mode = opts.mode || parseInt("777", 8) & 0xfff,
-      mtime = opts.mtime || Math.floor(new Date().getTime() / 1000),
+    const info = opts.filePath && (await Deno.stat(opts.filePath));
+
+    let mode = opts.mode || (info && info.mode) || parseInt("777", 8) & 0xfff,
+      mtime =
+        opts.mtime ||
+        (info && info.modified) ||
+        Math.floor(new Date().getTime() / 1000),
       uid = opts.uid || 0,
       gid = opts.gid || 0;
 
@@ -230,10 +235,7 @@ export class Tar {
       fileMode: pad(mode, 7),
       uid: pad(uid, 7),
       gid: pad(gid, 7),
-      fileSize: pad(
-        opts.filePath ? (await Deno.stat(opts.filePath)).len : opts.contentSize,
-        11
-      ),
+      fileSize: pad(info ? info.len : opts.contentSize, 11),
       mtime: pad(mtime, 11),
       checksum: "        ",
       type: "0", // just a file
