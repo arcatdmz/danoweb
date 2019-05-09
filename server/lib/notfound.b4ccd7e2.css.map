@@ -1,1 +1,0 @@
-{"version":3,"sources":["notfound.css"],"names":[],"mappings":"AAAA,KACE,YAAa,CACb,sBAAuB,CACvB,kBACF,CAEA,UACE,iBACF","file":"notfound.b4ccd7e2.css","sourceRoot":"..\\..\\client","sourcesContent":["body {\r\n  display: flex;\r\n  justify-content: center;\r\n  align-items: center;\r\n}\r\n\r\n#notfound {\r\n  text-align: center;\r\n}\r\n"]}
