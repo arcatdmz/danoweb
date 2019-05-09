@@ -3,6 +3,7 @@ import { Status, Response, extname, contentType } from "../deps.ts";
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveJSON } from "../io.ts";
 import { AuthHandler } from "../auth.ts";
+import { Tar } from "../tar.ts";
 
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
@@ -28,7 +29,11 @@ export class APIRequestHandler implements RequestHandler {
     if (path.indexOf(`${pathPrefix}/`) !== 0) return null;
     path = path.substr(pathPrefix.length);
 
-    return this.info(path, options) || this.auth(path, options);
+    return (
+      this.info(path, options) ||
+      this.auth(path, options) ||
+      this.download(path, options)
+    );
   }
 
   info(path: string, _options: RequestHandlerOptions) {
@@ -62,5 +67,38 @@ export class APIRequestHandler implements RequestHandler {
       },
       encoder
     );
+  }
+
+  download(path: string, options: RequestHandlerOptions) {
+    if (path !== "/download") return null;
+    const { encoder, auth } = this.options;
+    const { req } = options;
+    try {
+      if (!auth.check(req)) {
+        throw new Error("authentication failed");
+      }
+    } catch (e) {
+      const res = serveJSON(
+        {
+          success: false,
+          error: e.message
+        },
+        encoder
+      );
+      res.status = Status.Unauthorized;
+      return res;
+    }
+    const headers = new Headers();
+    headers.set("content-type", "application/tar");
+    headers.set("content-disposition", 'attachment;filename="danoweb.tar"');
+    const tar = new Tar();
+    const body = tar.append(
+      "test.txt",
+      encoder.encode("testing file download.")
+    );
+    return {
+      body,
+      headers
+    };
   }
 }
