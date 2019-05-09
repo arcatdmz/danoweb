@@ -47,6 +47,7 @@ const apiHandler = new APIRequestHandler({
   env: clientEnv,
   debug,
   auth,
+  userDir,
   systemPath
 });
 const editorHandler = new EditorRequestHandler({

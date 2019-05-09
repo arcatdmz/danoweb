@@ -1,4 +1,4 @@
-import { Status, Response, extname, contentType } from "../deps.ts";
+import { Status, Response, sep } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveJSON, Uint8ArrayReader } from "../io.ts";
@@ -11,6 +11,7 @@ export interface APIRequestHandlerOptions {
   env: { [index: string]: string };
   debug: boolean;
   auth: AuthHandler;
+  userDir: string;
   systemPath: string;
 }
 
@@ -69,9 +70,9 @@ export class APIRequestHandler implements RequestHandler {
     );
   }
 
-  download(path: string, options: RequestHandlerOptions) {
+  async download(path: string, options: RequestHandlerOptions) {
     if (path !== "/download") return null;
-    const { encoder, auth } = this.options;
+    const { encoder, auth, userDir } = this.options;
     const { req } = options;
     try {
       if (!auth.check(req)) {
@@ -88,15 +89,34 @@ export class APIRequestHandler implements RequestHandler {
       res.status = Status.Unauthorized;
       return res;
     }
+
     const headers = new Headers();
     headers.set("content-type", "application/tar");
     headers.set("content-disposition", 'attachment;filename="danoweb.tar"');
-    const content = encoder.encode("testing file download.");
-    const tar = new Tar();
-    tar.append("test.txt", {
-      reader: new Uint8ArrayReader(content),
-      contentSize: content.byteLength
-    });
+
+    const tar = new Tar(),
+      dirs = [userDir],
+      promises: Promise<void>[] = [];
+    while (dirs.length > 0) {
+      const dir = dirs.pop();
+      for (const item of await Deno.readDir(dir)) {
+        const filePath = dir + sep + item.name;
+        if (item.isDirectory()) {
+          dirs.push(filePath);
+        } else {
+          const relativePath = filePath
+            .substr(userDir.length + 1)
+            .split(sep)
+            .join("/");
+          promises.push(
+            tar.append(relativePath, {
+              filePath
+            })
+          );
+        }
+      }
+    }
+    await Promise.all(promises);
     const body = tar.getReader();
     return {
       body,
