@@ -1,7 +1,7 @@
 import { Status, Response, extname, contentType } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
-import { serveJSON } from "../io.ts";
+import { serveJSON, Uint8ArrayReader } from "../io.ts";
 import { AuthHandler } from "../auth.ts";
 import { Tar } from "../tar.ts";
 
@@ -91,14 +91,16 @@ export class APIRequestHandler implements RequestHandler {
     const headers = new Headers();
     headers.set("content-type", "application/tar");
     headers.set("content-disposition", 'attachment;filename="danoweb.tar"');
+    const content = encoder.encode("testing file download.");
     const tar = new Tar();
-    const body = tar.append(
-      "test.txt",
-      encoder.encode("testing file download.")
-    );
+    tar.append("test.txt", {
+      reader: new Uint8ArrayReader(content),
+      contentSize: content.byteLength
+    });
+    const body = tar.getReader();
     return {
       body,
       headers
-    };
+    } as Response;
   }
 }

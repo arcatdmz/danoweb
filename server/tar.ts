@@ -23,6 +23,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import { Uint8ArrayReader } from "./io.ts";
+import { MultiReader } from "./deps.ts";
 
 const recordSize = 512;
 
@@ -129,9 +131,33 @@ export interface TarData {
   ustar: string;
   owner: string;
   group: string;
+
+  /**
+   * file to read
+   */
+  filePath: string;
+  /**
+   * buffer to read
+   */
+  reader: Deno.Reader;
 }
 
 export interface TarOptions {
+  /**
+   * append file
+   */
+  filePath?: string;
+
+  /**
+   * append any arbitrary content
+   */
+  reader?: Deno.Reader;
+
+  /**
+   * size of the content to be appended
+   */
+  contentSize?: number;
+
   mode?: number;
   mtime?: number;
   uid?: number;
@@ -140,28 +166,58 @@ export interface TarOptions {
   group?: string;
 }
 
+export class FileReader implements Deno.Reader {
+  private filePath: string;
+  private file: Deno.File;
+  constructor(filePath: string) {
+    this.filePath = filePath;
+  }
+  public async read(p: Uint8Array) {
+    if (!this.file) {
+      this.file = await Deno.open(this.filePath, "r");
+    }
+    const res = await Deno.read(this.file.rid, p);
+    if (res.eof) {
+      await Deno.close(this.file.rid);
+      this.file = null;
+    }
+    return res;
+  }
+}
+
+export class FileWriter implements Deno.Writer {
+  private filePath: string;
+  private file: Deno.File;
+  constructor(filePath: string) {
+    this.filePath = filePath;
+  }
+  public async write(p: Uint8Array) {
+    if (!this.file) {
+      this.file = await Deno.open(this.filePath, "w");
+    }
+    return Deno.write(this.file.rid, p);
+  }
+  public async dispose() {
+    if (!this.file) return;
+    Deno.close(this.file.rid);
+    this.file = null;
+  }
+}
+
 export class Tar {
+  data: TarData[];
   written: number;
   out: Uint8Array;
   private blockSize: number;
 
   constructor(recordsPerBlock?: number) {
+    this.data = [];
     this.written = 0;
     this.blockSize = (recordsPerBlock || 20) * recordSize;
     this.out = clean(this.blockSize);
   }
 
-  append(
-    filepath: string,
-    input: Uint8Array,
-    opts?: TarOptions,
-    callback?: (out: Uint8Array) => void
-  ) {
-    if (typeof opts === "function") {
-      callback = opts;
-      opts = {};
-    }
-
+  async append(fileName: string, opts: TarOptions) {
     opts = opts || {};
 
     let mode = opts.mode || parseInt("777", 8) & 0xfff,
@@ -169,67 +225,63 @@ export class Tar {
       uid = opts.uid || 0,
       gid = opts.gid || 0;
 
-    let data = {
-      fileName: filepath,
+    const tarData = {
+      fileName,
       fileMode: pad(mode, 7),
       uid: pad(uid, 7),
       gid: pad(gid, 7),
-      fileSize: pad(input.length, 11),
+      fileSize: pad(
+        opts.filePath ? (await Deno.stat(opts.filePath)).len : opts.contentSize,
+        11
+      ),
       mtime: pad(mtime, 11),
       checksum: "        ",
       type: "0", // just a file
       ustar: "ustar\u000000\u0000",
       owner: opts.owner || "",
-      group: opts.group || ""
+      group: opts.group || "",
+      filePath: opts.filePath,
+      reader: opts.reader
     } as TarData;
 
     // calculate the checksum
     let checksum = 0;
     const encoder = new TextEncoder();
-    Object.keys(data).forEach(function(key) {
-      checksum += encoder.encode(data[key]).reduce((p, c) => p + c, 0);
-    });
+    Object.keys(tarData)
+      .filter(key => ["filePath", "reader"].indexOf(key) < 0)
+      .forEach(function(key) {
+        checksum += encoder.encode(tarData[key]).reduce((p, c) => p + c, 0);
+      });
 
-    data.checksum = pad(checksum, 6) + "\u0000 ";
-
-    const headerArr = format(data);
-
-    this.out.set(headerArr, this.written);
-
-    this.written += headerArr.byteLength;
-
-    // If there is not enough space in this.out, we need to expand it to
-    // fit the new input.
-    if (this.written + input.byteLength > this.out.byteLength) {
-      this.out = extend(
-        this.out,
-        this.written,
-        input.byteLength,
-        this.blockSize
-      );
-    }
-
-    this.out.set(input, this.written);
-
-    // to the nearest multiple of recordSize
-    this.written +=
-      input.length + (recordSize - (input.length % recordSize || recordSize));
-
-    // make sure there's at least 2 empty records worth of extra space
-    if (this.out.length - this.written < recordSize * 2) {
-      this.out = extend(this.out, this.written, recordSize * 2, this.blockSize);
-    }
-
-    if (typeof callback === "function") {
-      callback(this.out);
-    }
-
-    return this.out;
+    tarData.checksum = pad(checksum, 6) + "\u0000 ";
+    this.data.push(tarData);
   }
 
-  clear() {
-    this.written = 0;
-    this.out = clean(this.blockSize);
+  getReader() {
+    const readers: Deno.Reader[] = [];
+    this.data.forEach(tarData => {
+      let { filePath, reader } = tarData,
+        headerArr = format(tarData);
+      readers.push(new Uint8ArrayReader(headerArr));
+      if (!reader) {
+        reader = new FileReader(filePath);
+      }
+      readers.push(reader);
+
+      // to the nearest multiple of recordSize
+      readers.push(
+        new Uint8ArrayReader(
+          clean(
+            recordSize -
+              (parseInt(tarData.fileSize, 8) % recordSize || recordSize)
+          )
+        )
+      );
+    });
+
+    // append 2 empty records
+    readers.push(new Uint8ArrayReader(clean(recordSize * 2)));
+    return new MultiReader(...readers);
   }
 }
 
@@ -248,18 +300,6 @@ function format(data: TarData) {
 function clean(length: number) {
   const buffer = new Uint8Array(length);
   buffer.fill(0, 0, length - 1);
-  return buffer;
-}
-
-function extend(
-  orig: Uint8Array,
-  length: number,
-  addLength: number,
-  multipleOf: number
-) {
-  const newSize = length + addLength,
-    buffer = clean((Math.floor(newSize / multipleOf) + 1) * multipleOf);
-  buffer.set(orig);
   return buffer;
 }
 

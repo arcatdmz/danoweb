@@ -6,6 +6,9 @@ import {
   serve
 } from "https://deno.land/std/http/server.ts";
 import { Status } from "https://deno.land/std/http/http_status.ts";
+
+import { MultiReader } from "https://deno.land/std/io/readers.ts";
+
 import {
   FormFile,
   isFormFile
@@ -24,6 +27,7 @@ import {
   posix,
   win32
 } from "https://deno.land/std/fs/path.ts";
+
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
 
 export {
@@ -32,6 +36,7 @@ export {
   Response,
   serve,
   Status,
+  MultiReader,
   FormFile,
   isFormFile,
   MultipartWriter,
