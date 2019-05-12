@@ -96,7 +96,7 @@ PORT=8000
 
 ### build
 
-1. install `deno` (tested with `v0.3.10`)
+1. install `deno` (tested with `v0.5.0`)
 2. build client-side code (requires `yarn`) -- this can be skipped since the built files are included in the repo
 
 ```sh
@@ -107,11 +107,11 @@ yarn build
 
 ### start
 
-start the server with `deno` (use `deno run` subcommand for `deno` v0.4.0 and later)
+start the server with `deno run` (use `deno` without `run` for `deno` below v0.4.0)
 
 ```sh
 cd server/
-deno --allow-env --allow-net --allow-read --allow-write server.ts
+deno run --allow-env --allow-net --allow-read --allow-write server.ts
 ```
 
 or `yarn`
