@@ -168,17 +168,18 @@ export interface TarOptions {
 
 export class FileReader implements Deno.Reader {
   private filePath: string;
-  private file: Deno.File;
+  private file: Deno.File | null;
   constructor(filePath: string) {
     this.filePath = filePath;
+    this.file = null;
   }
   public async read(p: Uint8Array) {
     if (!this.file) {
       this.file = await Deno.open(this.filePath, "r");
     }
     const res = await Deno.read(this.file.rid, p);
-    if (res.eof) {
-      await Deno.close(this.file.rid);
+    if (res === Deno.EOF) {
+      Deno.close(this.file.rid);
       this.file = null;
     }
     return res;
@@ -187,9 +188,10 @@ export class FileReader implements Deno.Reader {
 
 export class FileWriter implements Deno.Writer {
   private filePath: string;
-  private file: Deno.File;
+  private file: Deno.File | null;
   constructor(filePath: string) {
     this.filePath = filePath;
+    this.file = null;
   }
   public async write(p: Uint8Array) {
     if (!this.file) {
@@ -235,7 +237,7 @@ export class Tar {
       fileMode: pad(mode, 7),
       uid: pad(uid, 7),
       gid: pad(gid, 7),
-      fileSize: pad(info ? info.len : opts.contentSize, 11),
+      fileSize: pad(info ? info.size : opts.contentSize as number, 11),
       mtime: pad(mtime, 11),
       checksum: "        ",
       type: "0", // just a file
@@ -252,7 +254,8 @@ export class Tar {
     Object.keys(tarData)
       .filter(key => ["filePath", "reader"].indexOf(key) < 0)
       .forEach(function(key) {
-        checksum += encoder.encode(tarData[key]).reduce((p, c) => p + c, 0);
+        const field = (tarData as any)[key];
+        checksum += encoder.encode(field).reduce((p, c) => p + c, 0);
       });
 
     tarData.checksum = pad(checksum, 6) + "\u0000 ";
@@ -296,20 +299,16 @@ export class MyMultiReader implements Deno.Reader {
     this.readers = readers;
   }
 
-  async read(p: Uint8Array): Promise<Deno.ReadResult> {
+  async read(p: Uint8Array): Promise<number | Deno.EOF> {
     const r = this.readers[this.currentIndex];
     if (!r) {
-      return { nread: 0, eof: true };
+      return Deno.EOF;
     }
-    const { nread, eof } = await r.read(p);
-    if (eof) {
+    const res = await r.read(p);
+    if (res === Deno.EOF) {
       this.currentIndex++;
-      if (nread === 0) {
-        // don't return { nread: 0, eof: false } which is actually treated as { eof: true }
-        return this.read(p);
-      }
     }
-    return { nread, eof: false };
+    return res;
   }
 }
 
@@ -318,7 +317,8 @@ function format(data: TarData) {
     buffer = clean(512);
   let offset = 0;
   structure.forEach(function(value) {
-    const entry = encoder.encode(data[value.field] || "");
+    const field = (data as any)[value.field] as string;
+    const entry = encoder.encode(field || "");
     buffer.set(entry, offset);
     offset += value.length; // space it out with nulls
   });

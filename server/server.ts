@@ -82,7 +82,7 @@ async function main() {
     };
 
     // handle the request
-    let res: Response;
+    let res: Response | null;
     switch (method) {
       case "head":
         res = await handleHead(path, options);
@@ -122,7 +122,7 @@ async function main() {
 }
 
 async function handleHead(path: string, options: RequestHandlerOptions) {
-  let res: Response =
+  let res: Response | null =
     (await systemFileHandler.handle(path, options)) ||
     (await userFileHandler.handle(path, options));
   if (!res) {
@@ -138,7 +138,7 @@ async function handleHead(path: string, options: RequestHandlerOptions) {
 }
 
 async function handleGet(path: string, options: RequestHandlerOptions) {
-  let res: Response =
+  let res: Response | null =
     (await apiHandler.handle(path, options)) ||
     (await systemFileHandler.handle(path, options)) ||
     (await editorHandler.handle(path, options)) ||
@@ -151,7 +151,7 @@ async function handleGet(path: string, options: RequestHandlerOptions) {
 }
 
 async function handlePost(path: string, options: RequestHandlerOptions) {
-  let res: Response = await apiHandler.handle(path, options);
+  let res: Response | null = await apiHandler.handle(path, options);
   if (!res) {
     res = serveJSON(
       {
@@ -165,7 +165,7 @@ async function handlePost(path: string, options: RequestHandlerOptions) {
 }
 
 async function handlePut(path: string, options: RequestHandlerOptions) {
-  let res: Response = await userFileHandler.handle(path, options);
+  let res: Response | null = await userFileHandler.handle(path, options);
   if (!res) {
     res = serveJSON(
       {

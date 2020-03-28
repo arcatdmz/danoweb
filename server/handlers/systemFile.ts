@@ -1,4 +1,4 @@
-import { Status } from "../deps.ts";
+import { Response, Status } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveHead, serveFile, serveJSON } from "../io.ts";
@@ -21,7 +21,7 @@ export class SystemFileRequestHandler implements RequestHandler {
     this.options = options;
   }
 
-  async handle(path: string, options: RequestHandlerOptions) {
+  async handle(path: string, options: RequestHandlerOptions): Promise<Response | null> {
     const { systemDir, systemPath } = this.options;
     if (path === systemPath || path.indexOf(`${systemPath}/`) !== 0)
       return null;

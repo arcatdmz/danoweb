@@ -20,7 +20,7 @@ export function getEnv(clientVars: string[]) {
   const env = env_();
   const clientEnv = Object.keys(env)
     .filter(key => clientVars.includes(key))
-    .reduce((obj, key) => {
+    .reduce<typeof env>((obj, key) => {
       obj[key] = env[key];
       return obj;
     }, {});
@@ -59,14 +59,14 @@ export function parseUrl(url: string) {
  * Query parameters
  */
 export interface QueryParameters {
-  [key: string]: string;
+  [key: string]: string | null;
 }
 
 /**
  * Request handler
  */
 export interface RequestHandler {
-  handle(path: string, options?: RequestHandlerOptions): Promise<Response>;
+  handle(path: string, options?: RequestHandlerOptions): Promise<Response | null>;
 }
 
 /**

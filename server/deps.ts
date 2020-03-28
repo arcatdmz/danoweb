@@ -11,12 +11,10 @@ import { MultiReader } from "https://deno.land/std/io/readers.ts";
 
 import {
   FormFile,
-  isFormFile
-} from "https://deno.land/std/multipart/formfile.ts";
-import {
+  isFormFile,
   MultipartWriter,
   MultipartReader
-} from "https://deno.land/std/multipart/multipart.ts";
+} from "https://deno.land/std/mime/multipart.ts";
 
 import { ensureDir, move } from "https://deno.land/std/fs/mod.ts";
 import {
@@ -26,7 +24,7 @@ import {
   sep,
   posix,
   win32
-} from "https://deno.land/std/fs/path.ts";
+} from "https://deno.land/std/path/mod.ts";
 
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
 

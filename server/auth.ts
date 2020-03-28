@@ -1,7 +1,7 @@
 import { ServerRequest } from "./deps.ts";
 
 export interface AuthHandler {
-  check(req: ServerRequest);
+  check(req: ServerRequest): boolean;
 }
 
 export class AuthError extends Error {
@@ -21,13 +21,14 @@ export class BasicAuthHandler implements AuthHandler {
   }
   check(req: ServerRequest) {
     const auth = req.headers.get("authorization");
-    if (!auth || !/^Basic \s*[a-zA-Z0-9]+=*\s*$/.test(auth)) {
+    const res = auth && /^Basic \s*([a-zA-Z0-9]+=*)\s*$/.exec(auth);
+    if (!auth || !res) {
       throw new AuthError("authentication required");
     }
     let authenticated = false;
     try {
       const [username, password] = atob(
-        /^Basic \s*([a-zA-Z0-9]+=*)\s*$/.exec(auth)[1]
+        res[1]
       ).split(":", 2);
       authenticated = this.db[username] === password;
     } catch (e) {

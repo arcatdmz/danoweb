@@ -18,16 +18,17 @@ import {
 
 const { open, stat, writeFile } = Deno;
 
-export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo) {
-  filePath = filePath.replace(/\//g, sep);
+export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo): Response {
+  filePath = filePath && filePath.replace(/\//g, sep);
   const headers = new Headers();
   if (filePath && fileInfo) {
     const mediaType = contentType(extname(filePath));
-    headers.set("content-length", fileInfo.len.toString());
-    headers.set("content-type", mediaType);
+    headers.set("content-length", fileInfo.size.toString());
+    if (mediaType) {
+      headers.set("content-type", mediaType);
+    }
   }
   return {
-    body: null,
     status: fileInfo ? Status.OK : Status.NotFound,
     headers
   };
@@ -42,7 +43,7 @@ export async function serveFile(
   const file = await open(filePath);
   if (!fileInfo) fileInfo = await stat(filePath);
   const headers = new Headers();
-  headers.set("content-length", fileInfo.len.toString());
+  headers.set("content-length", fileInfo.size.toString());
   headers.set("content-type", mediaType);
   return {
     body: file,
@@ -62,16 +63,15 @@ export function serveJSON(json: any, encoder: TextEncoder): Response {
   };
 }
 
-export function serveHeadOfResponse(res: Response) {
+export function serveHeadOfResponse(res: Response): Response {
   const { status, headers } = res;
   return {
-    body: null,
     status,
     headers
   };
 }
 
-export function redirect(redirect: string, encoder: TextEncoder) {
+export function redirect(redirect: string, encoder: TextEncoder): Response {
   const res = serveJSON(
     {
       success: true,
@@ -86,7 +86,7 @@ export function redirect(redirect: string, encoder: TextEncoder) {
   return res;
 }
 
-export async function saveFormFile(formFile: FormFile, path: string) {
+export async function saveFormFile(formFile: FormFile, path: string): Promise<void> {
   // ensure that the parent directory exists
   const { dirname } = sep === "\\" ? win32 : posix;
   await ensureDir(dirname(path));
@@ -94,7 +94,7 @@ export async function saveFormFile(formFile: FormFile, path: string) {
   // save the file
   if (formFile.tempfile) {
     return move(formFile.tempfile, path, { overwrite: true });
-  } else {
+  } else if (formFile.content) {
     return writeFile(path, formFile.content, { create: true });
   }
 }
@@ -108,24 +108,26 @@ export class Uint8ArrayReader implements Deno.Reader {
     this.offset = 0;
   }
 
-  async read(p: Uint8Array): Promise<Deno.ReadResult> {
+  async read(p: Uint8Array): Promise<number | Deno.EOF> {
     const n = Math.min(p.byteLength, this.arr.byteLength - this.offset);
     p.set(this.arr.slice(this.offset, this.offset + n));
     this.offset += n;
-    return { nread: n, eof: this.offset === this.arr.byteLength };
+    return this.offset === this.arr.byteLength ? Deno.EOF : n;
   }
 }
 
 export class StreamReader {
   private stream: AsyncIterableIterator<Uint8Array>;
-  private chunk: IteratorResult<Uint8Array>;
+  private chunk: IteratorResult<Uint8Array> | null;
   private chunkOffset: number;
 
   constructor(stream: AsyncIterableIterator<Uint8Array>) {
     this.stream = stream;
+    this.chunk = null;
+    this.chunkOffset = 0;
   }
 
-  async read(p: Uint8Array): Promise<Deno.ReadResult> {
+  async read(p: Uint8Array): Promise<number | Deno.EOF> {
     let { stream, chunk, chunkOffset } = this;
     if (!chunk) {
       this.chunk = chunk = await stream.next();
@@ -145,7 +147,6 @@ export class StreamReader {
       nread = 0;
     }
     this.chunkOffset += nread;
-    const eof = chunk.done;
-    return { nread, eof };
+    return chunk.done ? Deno.EOF : nread;
   }
 }

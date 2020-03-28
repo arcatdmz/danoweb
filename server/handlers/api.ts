@@ -98,8 +98,8 @@ export class APIRequestHandler implements RequestHandler {
       dirs = [userDir],
       promises: Promise<void>[] = [];
     while (dirs.length > 0) {
-      const dir = dirs.pop();
-      for (const item of await Deno.readDir(dir)) {
+      const dir = dirs.pop() as string;
+      for (const item of await Deno.readdir(dir)) {
         const filePath = dir + sep + item.name;
         if (item.isDirectory()) {
           dirs.push(filePath);

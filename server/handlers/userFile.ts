@@ -52,7 +52,7 @@ export class UserFileRequestHandler implements RequestHandler {
   async handleGet(
     path: string,
     options: RequestHandlerOptions
-  ): Promise<Response> {
+  ): Promise<Response | null> {
     // get parameters
     const { userDir, encoder } = this.options;
     const { query } = options;
@@ -94,7 +94,7 @@ export class UserFileRequestHandler implements RequestHandler {
   async handlePut(
     path: string,
     options: RequestHandlerOptions
-  ): Promise<Response> {
+  ): Promise<Response | null> {
     const { userDir, encoder, auth } = this.options;
     const { req } = options;
 
@@ -116,7 +116,7 @@ export class UserFileRequestHandler implements RequestHandler {
     }
 
     // get content-type
-    const contentType = req.headers.get("content-type");
+    const contentType = req.headers.get("content-type") || "";
     const params = contentType.split(";");
     if (params[0] !== "multipart/form-data" || params.length < 2) return null;
 
@@ -127,9 +127,8 @@ export class UserFileRequestHandler implements RequestHandler {
 
     // parse multipart/form-data
     // using StreamReader:
-    const stream = req.bodyStream();
     const reader = new MultipartReader(
-      new StreamReader(stream),
+      req.body,
       boundaryString
     );
 
@@ -152,7 +151,7 @@ export class UserFileRequestHandler implements RequestHandler {
     // get file content
     const result = await reader.readForm(4096);
     const file = result["content"] as FormFile;
-    let json: any, status: number;
+    let json: any, status: number = NaN;
     if (isFormFile(file)) {
       try {
         // save file
@@ -175,7 +174,9 @@ export class UserFileRequestHandler implements RequestHandler {
       status = Status.BadRequest;
     }
     const res = serveJSON(json, encoder);
-    res.status = status;
+    if (isNaN(status)) {
+      res.status = status;
+    }
     return res;
   }
 
