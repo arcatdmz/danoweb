@@ -120,9 +120,12 @@ export class Uint8ArrayReader implements Deno.Reader {
 
   async read(p: Uint8Array): Promise<number | Deno.EOF> {
     const n = Math.min(p.byteLength, this.arr.byteLength - this.offset);
+    if (n === 0) {
+      return Deno.EOF;
+    }
     p.set(this.arr.slice(this.offset, this.offset + n));
     this.offset += n;
-    return this.offset === this.arr.byteLength ? Deno.EOF : n;
+    return n;
   }
 }
 
