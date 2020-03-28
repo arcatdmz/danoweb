@@ -1,4 +1,4 @@
-import { Response, Status } from "../deps.ts";
+import { Response } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveFile, redirect } from "../io.ts";
@@ -21,7 +21,7 @@ export class EditorRequestHandler implements RequestHandler {
     this.options = options;
   }
 
-  async handle(path: string, options: RequestHandlerOptions) {
+  async handle(path: string, options: RequestHandlerOptions): Promise<Response | null> {
     if (options.query.mode !== "edit") return null;
     const { encoder, userDir, editorFile: editorPath } = this.options;
     const filePath = userDir + path;
