@@ -13,16 +13,16 @@
     "build-worker": "parcel build node_modules/monaco-editor/esm/vs/editor/editor.worker.js --no-source-maps --out-dir=../server/lib/ --public-url /lib/"
   },
   "dependencies": {
-    "@types/dotenv": "^6.1.1",
-    "axios": "^0.18.0",
-    "firebase": "5.5.5",
-    "js-cookie": "^2.2.0",
+    "@types/dotenv": "^8.2.0",
+    "axios": "^0.19.2",
+    "firebase": "^7.13.1",
+    "js-cookie": "^2.2.1",
     "milligram": "^1.3.0",
-    "monaco-editor": "0.14.3"
+    "monaco-editor": "^0.20.0"
   },
   "devDependencies": {
-    "@types/js-cookie": "^2.2.2",
-    "parcel-bundler": "^1.12.3",
-    "typescript": "^3.4.5"
+    "@types/js-cookie": "^2.2.5",
+    "parcel-bundler": "^1.12.4",
+    "typescript": "^3.8.3"
   }
 }
