@@ -57,6 +57,16 @@ export function serveJSON(json: any, encoder: TextEncoder): Response {
   const headers = new Headers();
   headers.set("content-length", body.byteLength.toString());
   headers.set("content-type", "application/json");
+  if (json && !json.success
+      && typeof json.error === "string"
+      && json.error === "authentication required") {
+    headers.set("www-authenticate", "Basic realm=\"Danoweb\", charset=\"UTF-8\"");
+    return {
+      body,
+      status: Status.Unauthorized,
+      headers
+    }
+  }
   return {
     body,
     headers
