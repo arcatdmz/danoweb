@@ -12,8 +12,6 @@
     "build-editor": "cd ../client && yarn build-pages"
   },
   "devDependencies": {
-    "cross-env": "^5.2.0",
-    "typescript": "^3.4.5",
-    "typescript-deno-plugin": "^1.2.4"
+    "cross-env": "^5.2.0"
   }
 }
