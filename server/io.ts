@@ -12,7 +12,7 @@ import {
   win32,
   ensureDir,
   move,
-  contentType,
+  contentType as contentTypeOrig,
   FormFile,
 } from "./deps.ts";
 
@@ -171,4 +171,11 @@ export class StreamReader {
     this.chunkOffset += nread;
     return chunk.done ? Deno.EOF : nread;
   }
+}
+
+export function contentType(ext: string) {
+  if (ext.toLowerCase() === ".ts") {
+    return "text/plain";
+  }
+  return contentTypeOrig(ext);
 }
