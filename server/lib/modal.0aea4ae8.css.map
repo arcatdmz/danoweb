@@ -1,0 +1,1 @@
+{"version":3,"sources":["modal.css"],"names":[],"mappings":"AAAA,KACE,YAAa,CACb,sBAAuB,CACvB,kBACF,CAEA,OACE,iBACF","file":"modal.0aea4ae8.css","sourceRoot":"..\\..\\client","sourcesContent":["body {\n  display: flex;\n  justify-content: center;\n  align-items: center;\n}\n\n#modal {\n  text-align: center;\n}\n"]}
