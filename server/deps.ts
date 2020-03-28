@@ -1,5 +1,7 @@
 import { config } from "https://deno.land/x/dotenv/dotenv.ts";
 
+import { Tar } from "https://deno.land/std/archive/tar.ts";
+
 import {
   ServerRequest,
   Response,
@@ -30,6 +32,7 @@ import { contentType } from "https://deno.land/std/media_types/mod.ts";
 
 export {
   config,
+  Tar,
   ServerRequest,
   Response,
   serve,

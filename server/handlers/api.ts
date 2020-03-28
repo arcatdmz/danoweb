@@ -1,9 +1,8 @@
-import { Status, Response, sep } from "../deps.ts";
+import { Status, Response, Tar, sep } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
 import { serveJSON } from "../io.ts";
 import { AuthHandler } from "../auth.ts";
-import { Tar } from "../tar.ts";
 
 export interface APIRequestHandlerOptions {
   encoder: TextEncoder;
