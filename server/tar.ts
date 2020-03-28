@@ -286,29 +286,7 @@ export class Tar {
 
     // append 2 empty records
     readers.push(new Uint8ArrayReader(clean(recordSize * 2)));
-    return new MyMultiReader(...readers);
-  }
-}
-
-/** Reader utility for combining multiple readers */
-export class MyMultiReader implements Deno.Reader {
-  private readonly readers: Deno.Reader[];
-  private currentIndex = 0;
-
-  constructor(...readers: Deno.Reader[]) {
-    this.readers = readers;
-  }
-
-  async read(p: Uint8Array): Promise<number | Deno.EOF> {
-    const r = this.readers[this.currentIndex];
-    if (!r) {
-      return Deno.EOF;
-    }
-    const res = await r.read(p);
-    if (res === Deno.EOF) {
-      this.currentIndex++;
-    }
-    return res;
+    return new MultiReader(...readers);
   }
 }
 
