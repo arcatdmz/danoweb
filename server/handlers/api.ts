@@ -55,7 +55,7 @@ export class APIRequestHandler implements RequestHandler {
       const res = serveJSON(
         {
           success: false,
-          error: e.message
+          error: e.message,
         },
         encoder
       );
@@ -64,7 +64,7 @@ export class APIRequestHandler implements RequestHandler {
     }
     return serveJSON(
       {
-        success: true
+        success: true,
       },
       encoder
     );
@@ -82,7 +82,7 @@ export class APIRequestHandler implements RequestHandler {
       const res = serveJSON(
         {
           success: false,
-          error: e.message
+          error: e.message,
         },
         encoder
       );
@@ -110,7 +110,7 @@ export class APIRequestHandler implements RequestHandler {
             .join("/");
           promises.push(
             tar.append(relativePath, {
-              filePath
+              filePath,
             })
           );
         }
@@ -120,7 +120,7 @@ export class APIRequestHandler implements RequestHandler {
     const body = tar.getReader();
     return {
       body,
-      headers
+      headers,
     } as Response;
   }
 }

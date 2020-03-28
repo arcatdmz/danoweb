@@ -21,7 +21,10 @@ export class SystemFileRequestHandler implements RequestHandler {
     this.options = options;
   }
 
-  async handle(path: string, options: RequestHandlerOptions): Promise<Response | null> {
+  async handle(
+    path: string,
+    options: RequestHandlerOptions
+  ): Promise<Response | null> {
     const { systemDir, systemPath } = this.options;
     if (path === systemPath || path.indexOf(`${systemPath}/`) !== 0)
       return null;
@@ -50,7 +53,7 @@ export class SystemFileRequestHandler implements RequestHandler {
     const { encoder } = this.options;
     const res = serveJSON(
       {
-        error: "system file not found"
+        error: "system file not found",
       },
       encoder
     );

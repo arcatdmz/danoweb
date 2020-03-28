@@ -3,7 +3,7 @@ import { config } from "https://deno.land/x/dotenv/dotenv.ts";
 import {
   ServerRequest,
   Response,
-  serve
+  serve,
 } from "https://deno.land/std/http/server.ts";
 import { Status } from "https://deno.land/std/http/http_status.ts";
 
@@ -13,7 +13,7 @@ import {
   FormFile,
   isFormFile,
   MultipartWriter,
-  MultipartReader
+  MultipartReader,
 } from "https://deno.land/std/mime/multipart.ts";
 
 import { ensureDir, move } from "https://deno.land/std/fs/mod.ts";
@@ -23,7 +23,7 @@ import {
   extname,
   sep,
   posix,
-  win32
+  win32,
 } from "https://deno.land/std/path/mod.ts";
 
 import { contentType } from "https://deno.land/std/media_types/mod.ts";
@@ -47,5 +47,5 @@ export {
   sep,
   posix,
   win32,
-  contentType
+  contentType,
 };

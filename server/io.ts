@@ -13,12 +13,15 @@ import {
   ensureDir,
   move,
   contentType,
-  FormFile
+  FormFile,
 } from "./deps.ts";
 
 const { open, stat, writeFile } = Deno;
 
-export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo): Response {
+export function serveHead(
+  filePath?: string,
+  fileInfo?: Deno.FileInfo
+): Response {
   filePath = filePath && filePath.replace(/\//g, sep);
   const headers = new Headers();
   if (filePath && fileInfo) {
@@ -30,7 +33,7 @@ export function serveHead(filePath?: string, fileInfo?: Deno.FileInfo): Response
   }
   return {
     status: fileInfo ? Status.OK : Status.NotFound,
-    headers
+    headers,
   };
 }
 
@@ -48,7 +51,7 @@ export async function serveFile(
   return {
     body: file,
     status: Status.OK,
-    headers
+    headers,
   };
 }
 
@@ -57,19 +60,22 @@ export function serveJSON(json: any, encoder: TextEncoder): Response {
   const headers = new Headers();
   headers.set("content-length", body.byteLength.toString());
   headers.set("content-type", "application/json");
-  if (json && !json.success
-      && typeof json.error === "string"
-      && json.error === "authentication required") {
-    headers.set("www-authenticate", "Basic realm=\"Danoweb\", charset=\"UTF-8\"");
+  if (
+    json &&
+    !json.success &&
+    typeof json.error === "string" &&
+    json.error === "authentication required"
+  ) {
+    headers.set("www-authenticate", 'Basic realm="Danoweb", charset="UTF-8"');
     return {
       body,
       status: Status.Unauthorized,
-      headers
-    }
+      headers,
+    };
   }
   return {
     body,
-    headers
+    headers,
   };
 }
 
@@ -77,7 +83,7 @@ export function serveHeadOfResponse(res: Response): Response {
   const { status, headers } = res;
   return {
     status,
-    headers
+    headers,
   };
 }
 
@@ -85,7 +91,7 @@ export function redirect(redirect: string, encoder: TextEncoder): Response {
   const res = serveJSON(
     {
       success: true,
-      redirect
+      redirect,
     },
     encoder
   );
@@ -96,7 +102,10 @@ export function redirect(redirect: string, encoder: TextEncoder): Response {
   return res;
 }
 
-export async function saveFormFile(formFile: FormFile, path: string): Promise<void> {
+export async function saveFormFile(
+  formFile: FormFile,
+  path: string
+): Promise<void> {
   // ensure that the parent directory exists
   const { dirname } = sep === "\\" ? win32 : posix;
   await ensureDir(dirname(path));

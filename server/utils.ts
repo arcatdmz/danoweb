@@ -19,7 +19,7 @@ export function getEnv(clientVars: string[]) {
   const { env: env_ } = Deno;
   const env = env_();
   const clientEnv = Object.keys(env)
-    .filter(key => clientVars.includes(key))
+    .filter((key) => clientVars.includes(key))
     .reduce<typeof env>((obj, key) => {
       obj[key] = env[key];
       return obj;
@@ -40,7 +40,7 @@ export function parseUrl(url: string) {
   // parse the query string
   let query: QueryParameters = {};
   if (paths.length > 1) {
-    paths[1].split("&").forEach(q_ => {
+    paths[1].split("&").forEach((q_) => {
       const q = q_.split("=");
       if (q.length < 2) {
         query[decodeURIComponent(q[0])] = null;
@@ -66,7 +66,10 @@ export interface QueryParameters {
  * Request handler
  */
 export interface RequestHandler {
-  handle(path: string, options?: RequestHandlerOptions): Promise<Response | null>;
+  handle(
+    path: string,
+    options?: RequestHandlerOptions
+  ): Promise<Response | null>;
 }
 
 /**

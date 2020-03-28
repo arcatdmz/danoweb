@@ -55,68 +55,68 @@ type TarStructure = { field: string; length: number }[];
 const structure: TarStructure = [
   {
     field: "fileName",
-    length: 100
+    length: 100,
   },
   {
     field: "fileMode",
-    length: 8
+    length: 8,
   },
   {
     field: "uid",
-    length: 8
+    length: 8,
   },
   {
     field: "gid",
-    length: 8
+    length: 8,
   },
   {
     field: "fileSize",
-    length: 12
+    length: 12,
   },
   {
     field: "mtime",
-    length: 12
+    length: 12,
   },
   {
     field: "checksum",
-    length: 8
+    length: 8,
   },
   {
     field: "type",
-    length: 1
+    length: 1,
   },
   {
     field: "linkName",
-    length: 100
+    length: 100,
   },
   {
     field: "ustar",
-    length: 8
+    length: 8,
   },
   {
     field: "owner",
-    length: 32
+    length: 32,
   },
   {
     field: "group",
-    length: 32
+    length: 32,
   },
   {
     field: "majorNumber",
-    length: 8
+    length: 8,
   },
   {
     field: "minorNumber",
-    length: 8
+    length: 8,
   },
   {
     field: "filenamePrefix",
-    length: 155
+    length: 155,
   },
   {
     field: "padding",
-    length: 12
-  }
+    length: 12,
+  },
 ];
 
 export interface TarData {
@@ -237,7 +237,7 @@ export class Tar {
       fileMode: pad(mode, 7),
       uid: pad(uid, 7),
       gid: pad(gid, 7),
-      fileSize: pad(info ? info.size : opts.contentSize as number, 11),
+      fileSize: pad(info ? info.size : (opts.contentSize as number), 11),
       mtime: pad(mtime, 11),
       checksum: "        ",
       type: "0", // just a file
@@ -245,15 +245,15 @@ export class Tar {
       owner: opts.owner || "",
       group: opts.group || "",
       filePath: opts.filePath,
-      reader: opts.reader
+      reader: opts.reader,
     } as TarData;
 
     // calculate the checksum
     let checksum = 0;
     const encoder = new TextEncoder();
     Object.keys(tarData)
-      .filter(key => ["filePath", "reader"].indexOf(key) < 0)
-      .forEach(function(key) {
+      .filter((key) => ["filePath", "reader"].indexOf(key) < 0)
+      .forEach(function (key) {
         const field = (tarData as any)[key];
         checksum += encoder.encode(field).reduce((p, c) => p + c, 0);
       });
@@ -264,7 +264,7 @@ export class Tar {
 
   getReader() {
     const readers: Deno.Reader[] = [];
-    this.data.forEach(tarData => {
+    this.data.forEach((tarData) => {
       let { filePath, reader } = tarData,
         headerArr = format(tarData);
       readers.push(new Uint8ArrayReader(headerArr));
@@ -294,7 +294,7 @@ function format(data: TarData) {
   const encoder = new TextEncoder(),
     buffer = clean(512);
   let offset = 0;
-  structure.forEach(function(value) {
+  structure.forEach(function (value) {
     const field = (data as any)[value.field] as string;
     const entry = encoder.encode(field || "");
     buffer.set(entry, offset);

@@ -27,9 +27,7 @@ export class BasicAuthHandler implements AuthHandler {
     }
     let authenticated = false;
     try {
-      const [username, password] = atob(
-        res[1]
-      ).split(":", 2);
+      const [username, password] = atob(res[1]).split(":", 2);
       authenticated = this.db[username] === password;
     } catch (e) {
       // do nothing

@@ -21,7 +21,7 @@ const { env, clientEnv } = getEnv([
   "STORAGE_BUCKET",
   "MESSAGING_SENDER_ID",
   "APP_ID",
-  "DATABASE_PREFIX"
+  "DATABASE_PREFIX",
 ]);
 
 // start the web server
@@ -48,22 +48,22 @@ const apiHandler = new APIRequestHandler({
   debug,
   auth,
   userDir,
-  systemPath
+  systemPath,
 });
 const editorHandler = new EditorRequestHandler({
   encoder,
   userDir,
-  editorFile
+  editorFile,
 });
 const systemFileHandler = new SystemFileRequestHandler({
   encoder,
   systemDir,
-  systemPath
+  systemPath,
 });
 const userFileHandler = new UserFileRequestHandler({
   encoder,
   userDir,
-  auth
+  auth,
 });
 
 // main loop
@@ -78,7 +78,7 @@ async function main() {
     const options: RequestHandlerOptions = {
       req,
       method,
-      query
+      query,
     };
 
     // handle the request
@@ -99,7 +99,7 @@ async function main() {
       default:
         res = serveJSON(
           {
-            error: "not implemented\n"
+            error: "not implemented\n",
           },
           encoder
         );
@@ -115,7 +115,7 @@ async function main() {
         method,
         path,
         query,
-        status: res.status || Status.OK
+        status: res.status || Status.OK,
       })
     );
   }
@@ -128,7 +128,7 @@ async function handleHead(path: string, options: RequestHandlerOptions) {
   if (!res) {
     res = serveJSON(
       {
-        error: "not implemented\n"
+        error: "not implemented\n",
       },
       encoder
     );
@@ -155,7 +155,7 @@ async function handlePost(path: string, options: RequestHandlerOptions) {
   if (!res) {
     res = serveJSON(
       {
-        error: "not found"
+        error: "not found",
       },
       encoder
     );
@@ -169,7 +169,7 @@ async function handlePut(path: string, options: RequestHandlerOptions) {
   if (!res) {
     res = serveJSON(
       {
-        error: "internal server error"
+        error: "internal server error",
       },
       encoder
     );

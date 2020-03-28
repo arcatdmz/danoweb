@@ -4,7 +4,7 @@ import {
   isFormFile,
   MultipartReader,
   Response,
-  sep
+  sep,
 } from "../deps.ts";
 
 import { RequestHandlerOptions, RequestHandler } from "../utils.ts";
@@ -15,7 +15,7 @@ import {
   serveHeadOfResponse,
   redirect,
   saveFormFile,
-  StreamReader
+  StreamReader,
 } from "../io.ts";
 import { AuthHandler } from "../auth.ts";
 
@@ -107,7 +107,7 @@ export class UserFileRequestHandler implements RequestHandler {
       const res = serveJSON(
         {
           success: false,
-          error: e.message
+          error: e.message,
         },
         encoder
       );
@@ -127,10 +127,7 @@ export class UserFileRequestHandler implements RequestHandler {
 
     // parse multipart/form-data
     // using StreamReader:
-    const reader = new MultipartReader(
-      req.body,
-      boundaryString
-    );
+    const reader = new MultipartReader(req.body, boundaryString);
 
     // using Uint8ArrayReader:
     // const arr = await req.body();
@@ -151,7 +148,8 @@ export class UserFileRequestHandler implements RequestHandler {
     // get file content
     const result = await reader.readForm(4096);
     const file = result["content"] as FormFile;
-    let json: any, status: number = NaN;
+    let json: any,
+      status: number = NaN;
     if (isFormFile(file)) {
       try {
         // save file
@@ -164,7 +162,7 @@ export class UserFileRequestHandler implements RequestHandler {
           path,
           filename: file.filename,
           size: file.size,
-          type: file.type
+          type: file.type,
         };
       } catch (e) {
         json = { success: false, error: "saving file failed", details: e };

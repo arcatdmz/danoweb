@@ -14,11 +14,11 @@ const content = encoder.encode("hello tar world!");
 tar
   .append("output.txt", {
     reader: new Uint8ArrayReader(content),
-    contentSize: content.byteLength
+    contentSize: content.byteLength,
   })
   .then(() =>
     tar.append("dir/tar.ts", {
-      filePath: "./tar.ts"
+      filePath: "./tar.ts",
     })
   )
   .then(async () => {

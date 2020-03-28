@@ -21,7 +21,10 @@ export class EditorRequestHandler implements RequestHandler {
     this.options = options;
   }
 
-  async handle(path: string, options: RequestHandlerOptions): Promise<Response | null> {
+  async handle(
+    path: string,
+    options: RequestHandlerOptions
+  ): Promise<Response | null> {
     if (options.query.mode !== "edit") return null;
     const { encoder, userDir, editorFile: editorPath } = this.options;
     const filePath = userDir + path;
