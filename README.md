@@ -96,7 +96,7 @@ PORT=8000
 
 ### build
 
-1. install `deno` (tested with `v0.5.0`)
+1. install `deno` (tested with `v0.37.1`)
 2. build client-side code (requires `yarn`) -- this can be skipped since the built files are included in the repo
 
 ```sh
