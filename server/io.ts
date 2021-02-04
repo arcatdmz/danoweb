@@ -12,7 +12,7 @@ import {
   win32,
   ensureDir,
   move,
-  contentType as contentTypeOrig,
+  lookup,
   FormFile,
 } from "./deps.ts";
 
@@ -25,7 +25,7 @@ export function serveHead(
   filePath = filePath && filePath.replace(/\//g, sep);
   const headers = new Headers();
   if (filePath && fileInfo) {
-    const mediaType = contentType(extname(filePath));
+    const mediaType = contentType(filePath);
     headers.set("content-length", fileInfo.size.toString());
     if (mediaType) {
       headers.set("content-type", mediaType);
@@ -127,10 +127,10 @@ export class Uint8ArrayReader implements Deno.Reader {
     this.offset = 0;
   }
 
-  async read(p: Uint8Array): Promise<number | Deno.EOF> {
+  async read(p: Uint8Array): Promise<number | null> {
     const n = Math.min(p.byteLength, this.arr.byteLength - this.offset);
     if (n === 0) {
-      return Deno.EOF;
+      return null;
     }
     p.set(this.arr.slice(this.offset, this.offset + n));
     this.offset += n;
@@ -149,7 +149,7 @@ export class StreamReader {
     this.chunkOffset = 0;
   }
 
-  async read(p: Uint8Array): Promise<number | Deno.EOF> {
+  async read(p: Uint8Array): Promise<number | null> {
     let { stream, chunk, chunkOffset } = this;
     if (!chunk) {
       this.chunk = chunk = await stream.next();
@@ -169,13 +169,13 @@ export class StreamReader {
       nread = 0;
     }
     this.chunkOffset += nread;
-    return chunk.done ? Deno.EOF : nread;
+    return chunk.done ? null : nread;
   }
 }
 
 export function contentType(ext: string) {
-  if (ext.toLowerCase() === ".ts") {
+  if (ext.toLowerCase().endsWith(".ts")) {
     return "text/plain";
   }
-  return contentTypeOrig(ext);
+  return lookup(ext);
 }

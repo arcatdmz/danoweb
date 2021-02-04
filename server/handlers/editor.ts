@@ -30,7 +30,7 @@ export class EditorRequestHandler implements RequestHandler {
     const filePath = userDir + path;
     try {
       const fileInfo = await stat(filePath);
-      if (fileInfo.isDirectory()) {
+      if (fileInfo.isDirectory) {
         path = path.charAt(path.length - 1) === "/" ? path : `${path}/`;
         return redirect(`${path}index.html?mode=edit`, encoder);
       }

@@ -28,17 +28,17 @@ import {
   win32,
 } from "https://deno.land/std/path/mod.ts";
 
-import { contentType } from "https://deno.land/std/media_types/mod.ts";
+import { lookup } from "https://deno.land/x/media_types/mod.ts";
+
+export type { Response, FormFile };
 
 export {
   config,
   Tar,
   ServerRequest,
-  Response,
   serve,
   Status,
   MultiReader,
-  FormFile,
   isFormFile,
   MultipartWriter,
   MultipartReader,
@@ -50,5 +50,5 @@ export {
   sep,
   posix,
   win32,
-  contentType,
+  lookup,
 };

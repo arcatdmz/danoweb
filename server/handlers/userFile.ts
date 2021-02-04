@@ -66,7 +66,7 @@ export class UserFileRequestHandler implements RequestHandler {
       const fileInfo = await stat(filePath);
 
       // path points to a directory
-      if (fileInfo.isDirectory()) {
+      if (fileInfo.isDirectory) {
         if (check) {
           return serveJSON({ success: true, type: "directory" }, encoder);
         }
@@ -147,7 +147,7 @@ export class UserFileRequestHandler implements RequestHandler {
 
     // get file content
     const result = await reader.readForm(4096);
-    const file = result["content"] as FormFile;
+    const file = result.file("content");
     let json: any,
       status: number = NaN;
     if (isFormFile(file)) {

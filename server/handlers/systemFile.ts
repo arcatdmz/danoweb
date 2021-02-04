@@ -31,7 +31,7 @@ export class SystemFileRequestHandler implements RequestHandler {
     const filePath = systemDir + path.substr(systemPath.length);
     try {
       const fileInfo = await stat(filePath);
-      if (fileInfo.isDirectory()) {
+      if (fileInfo.isDirectory) {
         return this.handle(
           (path.substr(-1) === "/" ? "" : "/") + "index.html",
           options

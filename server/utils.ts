@@ -16,8 +16,7 @@ export function getEnv(clientVars: string[]) {
   } catch (e) {
     // do nothing
   }
-  const { env: env_ } = Deno;
-  const env = env_();
+  const env = Deno.env.toObject();
   const clientEnv = Object.keys(env)
     .filter((key) => clientVars.includes(key))
     .reduce<typeof env>((obj, key) => {
