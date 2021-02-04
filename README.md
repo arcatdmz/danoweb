@@ -4,7 +4,7 @@
 
 ## how to use
 
-demo site: https://danoweb.site/
+demo site: https://danoweb.azurewebsites.net/
 
 1. anyone can (collaboratively) edit any served text files by appending `?mode=edit` query parameter -- どのページも URL 末尾に `?mode=edit` をつけると編集できます
 2. those who know the authentication token (`USER_PASSWORD`) can save the edits to update the served files (ask [me](https://twitter.com/arcatdmz) if interested) -- 編集結果をファイルに書き戻すには `USER_PASSWORD` が必要です
@@ -18,7 +18,7 @@ demo site: https://danoweb.site/
   - [Deno](https://deno.land/) allows to load TypeScript files on the web
   - many put files on GitHub and load them through [denopkg.com](https://github.com/denopkg/denopkg.com)
   - dano focuses on a more direct and casual way of sharing/editing code
-  - e.g., `deno https://danoweb.site/index.ts` -- the code can be edited at https://danoweb.site/index.ts?mode=edit
+  - e.g., `deno https://danoweb.azurewebsites.net/index.ts` -- the code can be edited at https://danoweb.azurewebsites.net/index.ts?mode=edit
 
 ### backend
 
@@ -34,7 +34,40 @@ demo site: https://danoweb.site/
 
 ## deploy
 
-### A. deploy to Heroku
+### a) use pre-built Docker image
+
+Regarding environment variables, see below.
+
+```sh
+docker run --name danoweb -p 8000:8000 \
+  -e API_KEY=... \
+  -e AUTH_DOMAIN=... \
+  -e DATABASE_URL=... \
+  -e PROJECT_ID=... \
+  -e STORAGE_BUCKET=bucket_id.appspot.com \
+  -e MESSAGING_SENDER_ID=... \
+  -e APP_ID=... \
+  -e DATABASE_PREFIX=prefix_ \
+  -e USER_PASSWORD=password \
+  arcatdmz/danoweb
+```
+
+### b) build docker image and run
+
+1. git clone
+2. see "environment variables" section and put the `.env` file accordingly
+3. docker build and run
+
+```sh
+git clone https://github.com/arcatdmz/danoweb.git
+cd danoweb
+vi ./server/.env
+docker build . -t danoweb
+docker build . --file Dockerfile.local -t danoweb:local
+docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
+```
+
+### c) deploy to Heroku
 
 1. git clone
 2. see "environment variables" section and put the `.env` file accordingly
@@ -50,21 +83,6 @@ heroku create <your app name>
 heroku stack:set container
 heroku config:push -f ./server/.env
 git push heroku master
-```
-
-### B. docker build and run
-
-1. git clone
-2. see "environment variables" section and put the `.env` file accordingly
-3. docker build and run
-
-```sh
-git clone https://github.com/arcatdmz/danoweb.git
-cd danoweb
-vi ./server/.env
-docker build . -t danoweb
-docker build . --file Dockerfile.local -t danoweb:local
-docker run --name danoweb -v ./public:/work/server/public -p 8000:8000 danoweb:local
 ```
 
 ## environment variables
