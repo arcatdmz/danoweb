@@ -42,7 +42,8 @@ export async function serveFile(
   fileInfo?: Deno.FileInfo
 ): Promise<Response> {
   filePath = filePath.replace(/\//g, sep);
-  const mediaType = contentType(extname(filePath)) || "text/plain";
+  let mediaType = contentType(extname(filePath)) || "text/plain";
+  if (mediaType.substr(0, 5) === "text/") mediaType += "; charset=utf-8"
   const file = await open(filePath);
   if (!fileInfo) fileInfo = await stat(filePath);
   const headers = new Headers();
