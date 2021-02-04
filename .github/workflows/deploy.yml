@@ -1,0 +1,121 @@
+name: Build and deploy Docker app to Azure
+on:
+  push:
+    branches:
+      - master
+env:
+  AZURE_WEBAPP_NAME: danoweb
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set env vars
+        run: |
+          IMAGE_PATH=ghcr.io/${{ github.repository }}
+          IMAGE_PATH=$(echo ${IMAGE_PATH} | tr '[A-Z]' '[a-z]')
+          echo "IMAGE_PATH=${IMAGE_PATH}" >> ${GITHUB_ENV}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build image
+        run: docker build -t ${IMAGE_PATH}:release .
+      - name: Docker login
+        run: echo "${{ secrets.GCR_TOKEN }}" | docker login https://ghcr.io -u ${{ secrets.GCR_USERNAME }} --password-stdin
+      - name: Docker push
+        run: docker push ${IMAGE_PATH}:release
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Set env vars
+        run: |
+          IMAGE_PATH=ghcr.io/${{ github.repository }}
+          IMAGE_PATH=$(echo ${IMAGE_PATH} | tr '[A-Z]' '[a-z]')
+          echo "IMAGE_PATH=${IMAGE_PATH}" >> ${GITHUB_ENV}
+      - name: Azure authentication
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: Set Web App GCR authentication
+        uses: Azure/appservice-settings@v1
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-settings-json: |
+            [
+              {
+                "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+                "value": "${{ secrets.GCR_TOKEN }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_URL",
+                "value": "https://ghcr.io",
+                "slotSetting": false
+              },
+              {
+                "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+                "value": "${{ secrets.GCR_USERNAME }}",
+                "slotSetting": false
+              },
+              {
+                "name": "WEBSITES_PORT",
+                "value": "8000",
+                "slotSetting": false
+              },
+              {
+                "name": "API_KEY",
+                "value": "${{ secrets.DW_API_KEY }}",
+                "slotSetting": false
+              },
+              {
+                "name": "AUTH_DOMAIN",
+                "value": "${{ secrets.DW_AUTH_DOMAIN }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DATABASE_URL",
+                "value": "${{ secrets.DW_DATABASE_URL }}",
+                "slotSetting": false
+              },
+              {
+                "name": "PROJECT_ID",
+                "value": "${{ secrets.DW_PROJECT_ID }}",
+                "slotSetting": false
+              },
+              {
+                "name": "STORAGE_BUCKET",
+                "value": "${{ secrets.DW_STORAGE_BUCKET }}",
+                "slotSetting": false
+              },
+              {
+                "name": "MESSAGING_SENDER_ID",
+                "value": "${{ secrets.DW_MESSAGING_SENDER_ID }}",
+                "slotSetting": false
+              },
+              {
+                "name": "APP_ID",
+                "value": "${{ secrets.DW_APP_ID }}",
+                "slotSetting": false
+              },
+              {
+                "name": "DATABASE_PREFIX",
+                "value": "${{ secrets.DW_DATABASE_PREFIX }}",
+                "slotSetting": false
+              },
+              {
+                "name": "USER_PASSWORD",
+                "value": "${{ secrets.DW_USER_PASSWORD }}",
+                "slotSetting": false
+              },
+              {
+                "name": "HOST",
+                "value": "${{ secrets.DW_HOST }}",
+                "slotSetting": false
+              }
+            ]
+      - name: Deploy to Azure Web App for Container
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          images: ${{ env.IMAGE_PATH }}:release
