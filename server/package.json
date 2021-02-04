@@ -6,7 +6,7 @@
   "author": "Jun Kato <i@junkato.jp>",
   "license": "MIT",
   "scripts": {
-    "start": "deno run --allow-env --allow-net --allow-read --allow-write server.ts",
+    "start": "deno run --allow-env --allow-net --allow-read --allow-write --unstable server.ts",
     "dev": "yarn cross-env DENO_ENV=development yarn start",
     "build": "cd ../client && yarn build",
     "build-editor": "cd ../client && yarn build-pages"
