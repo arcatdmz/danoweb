@@ -12,17 +12,17 @@ jobs:
     steps:
       - name: Set env vars
         run: |
-          IMAGE_PATH=ghcr.io/${{ github.repository }}
+          IMAGE_PATH=${{ github.repository }}
           IMAGE_PATH=$(echo ${IMAGE_PATH} | tr '[A-Z]' '[a-z]')
           echo "IMAGE_PATH=${IMAGE_PATH}" >> ${GITHUB_ENV}
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build image
-        run: docker build -t ${IMAGE_PATH}:release .
+        run: docker build -t ${IMAGE_PATH} .
       - name: Docker login
-        run: echo "${{ secrets.GCR_TOKEN }}" | docker login https://ghcr.io -u ${{ secrets.GCR_USERNAME }} --password-stdin
+        run: echo "${{ secrets.DH_TOKEN }}" | docker login -u ${{ secrets.DH_USERNAME }} --password-stdin
       - name: Docker push
-        run: docker push ${IMAGE_PATH}:release
+        run: docker push ${IMAGE_PATH}
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
@@ -30,7 +30,7 @@ jobs:
     steps:
       - name: Set env vars
         run: |
-          IMAGE_PATH=ghcr.io/${{ github.repository }}
+          IMAGE_PATH=${{ github.repository }}
           IMAGE_PATH=$(echo ${IMAGE_PATH} | tr '[A-Z]' '[a-z]')
           echo "IMAGE_PATH=${IMAGE_PATH}" >> ${GITHUB_ENV}
       - name: Azure authentication
@@ -45,17 +45,17 @@ jobs:
             [
               {
                 "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
-                "value": "${{ secrets.GCR_TOKEN }}",
+                "value": "${{ secrets.DH_TOKEN }}",
                 "slotSetting": false
               },
               {
                 "name": "DOCKER_REGISTRY_SERVER_URL",
-                "value": "https://ghcr.io",
+                "value": "https://index.docker.io",
                 "slotSetting": false
               },
               {
                 "name": "DOCKER_REGISTRY_SERVER_USERNAME",
-                "value": "${{ secrets.GCR_USERNAME }}",
+                "value": "${{ secrets.DH_USERNAME }}",
                 "slotSetting": false
               },
               {
@@ -118,4 +118,4 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          images: ${{ env.IMAGE_PATH }}:release
+          images: ${{ env.IMAGE_PATH }}:latest
