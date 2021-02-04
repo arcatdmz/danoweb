@@ -3,5 +3,6 @@
   "files.exclude": {
     "server": true,
     "client": true
-  }
+  },
+  "deno.enable": true
 }
