@@ -36,7 +36,8 @@ demo site: https://danoweb.azurewebsites.net/
 
 ### a) use pre-built Docker image
 
-Regarding environment variables, see below.
+- docker hub: [arcatdmz/danoweb](https://hub.docker.com/r/arcatdmz/danoweb)
+- regarding environment variables, see below.
 
 ```sh
 docker run --name danoweb -p 8000:8000 \
