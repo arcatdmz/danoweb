@@ -4,7 +4,8 @@
 
 ## how to use
 
-demo site: https://danoweb.azurewebsites.net/
+- demo site: https://danoweb.digitalmuseum.jp
+- docker image: [arcatdmz/danoweb](https://hub.docker.com/r/arcatdmz/danoweb)
 
 1. anyone can (collaboratively) edit any served text files by appending `?mode=edit` query parameter -- どのページも URL 末尾に `?mode=edit` をつけると編集できます
 2. those who know the authentication token (`USER_PASSWORD`) can save the edits to update the served files (ask [me](https://twitter.com/arcatdmz) if interested) -- 編集結果をファイルに書き戻すには `USER_PASSWORD` が必要です
@@ -18,7 +19,7 @@ demo site: https://danoweb.azurewebsites.net/
   - [Deno](https://deno.land/) allows to load TypeScript files on the web
   - many put files on GitHub and load them through [denopkg.com](https://github.com/denopkg/denopkg.com)
   - dano focuses on a more direct and casual way of sharing/editing code
-  - e.g., `deno https://danoweb.azurewebsites.net/index.ts` -- the code can be edited at https://danoweb.azurewebsites.net/index.ts?mode=edit
+  - e.g., `deno https://danoweb.digitalmuseum.jp/index.ts` -- the code can be edited at https://danoweb.digitalmuseum.jp/index.ts?mode=edit
 
 ### backend
 
