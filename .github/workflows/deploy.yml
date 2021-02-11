@@ -8,7 +8,6 @@ env:
 jobs:
   build:
     name: Build
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
     steps:
       - name: Set env vars
@@ -26,7 +25,6 @@ jobs:
         run: docker push ${IMAGE_PATH}
   deploy:
     name: Deploy
-    if: "!contains(github.event.head_commit.message, 'skip ci')"
     runs-on: ubuntu-latest
     needs: build
     steps:
